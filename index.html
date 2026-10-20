@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpha-IAte Studio — jogos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(ellipse at top, #0d3c52 0%, #06161f 65%);
+    color: #eaf2f3; font-family: 'Courier New', monospace;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px; gap: 28px;
+  }
+  h1 {
+    font-size: 34px; letter-spacing: 8px; text-align: center;
+    background: linear-gradient(90deg, #e3ae52, #ff7a59, #7ab8ff, #e3ae52);
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 12px rgba(227,174,82,.45));
+    animation: shift 6s linear infinite;
+  }
+  .sub { color: #93b3bd; font-size: 14px; text-align: center; margin-top: -16px; }
+  @keyframes shift { to { background-position: 300% 0; } }
+  .games { display: grid; gap: 16px; width: 100%; max-width: 560px; }
+  a.game {
+    display: block; padding: 20px 24px; text-decoration: none; color: #eaf2f3;
+    border: 1px solid rgba(227,174,82,.4); border-radius: 12px;
+    background: rgba(255,255,255,.03); transition: all .15s;
+  }
+  a.game:hover { border-color: #e3ae52; box-shadow: 0 0 20px rgba(227,174,82,.35); transform: translateY(-2px); }
+  a.game h2 { font-size: 18px; margin-bottom: 6px; }
+  a.game p { font-size: 13px; color: #9ab; line-height: 1.5; }
+  footer { font-size: 12px; color: #667; text-align: center; }
+  footer a { color: #6ad; }
+  @media (prefers-reduced-motion: reduce) { h1 { animation: none; } }
+</style>
+</head>
+<body>
+<h1>ALPHA-IATE STUDIO</h1>
+<p class="sub">Jogos feitos por um comandante e uma tripulação de IA</p>
+<div class="games">
+  <a class="game" href="snake-cubo-3d-cdn.html">
+    <h2>🧊 Snake Cubo 3D</h2>
+    <p>A cobrinha anda na superfície de um cubo. Portais, missões, modos de jogo, skins e highscores.</p>
+  </a>
+  <a class="game" href="snake-cubo-3d-mobile-cdn.html">
+    <h2>📱 Snake Cubo 3D · Mobile</h2>
+    <p>A versão do cubo pensada para tela de celular.</p>
+  </a>
+  <a class="game" href="snake-neon.html">
+    <h2>🐍 Snake Neon 2D</h2>
+    <p>A versão clássica em cartoon: frutas variadas, power-ups e obstáculos.</p>
+  </a>
+  <a class="game" href="tetris-neon-3d.html">
+    <h2>🟦 Tetris Neon 3D</h2>
+    <p>Peças em 3D com brilho neon.</p>
+  </a>
+  <a class="game" href="snake-cubo-3d-offline.html">
+    <h2>📦 Snake Cubo 3D (offline)</h2>
+    <p>O jogo 3D com a biblioteca embutida: baixe o arquivo e jogue sem internet.</p>
+  </a>
+</div>
+<footer>HTML puro + Three.js · <a href="https://github.com/alphaiatestudio">github.com/alphaiatestudio</a></footer>
+</body>
+</html>

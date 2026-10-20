@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tetris Neon 3D</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(ellipse at top, #141428 0%, #0a0a12 60%);
+    color: #eee;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 14px;
+    overflow-x: hidden;
+  }
+  h1 {
+    font-size: 28px;
+    letter-spacing: 7px;
+    background: linear-gradient(90deg, #0ff, #b04cff, #ff0, #0ff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(120,160,255,.6));
+    animation: titleShift 6s linear infinite;
+    margin-bottom: 8px;
+  }
+  @keyframes titleShift { to { background-position: 300% 0; } }
+  #hud { display: flex; gap: 12px; margin-bottom: 8px; font-size: 15px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  #hud span { padding: 4px 14px; border-radius: 20px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+  #hud .score   { color: #0f0; text-shadow: 0 0 8px #0f0; }
+  #hud .hiscore { color: #f0f; text-shadow: 0 0 8px #f0f; }
+  #hud .level   { color: #0ff; text-shadow: 0 0 8px #0ff; }
+  #hud .layers  { color: #ff0; text-shadow: 0 0 8px #ff0; }
+  #hud .menuBtn {
+    cursor: pointer; color: #8ab; border: 1px dashed rgba(0,255,255,.45) !important;
+    user-select: none; transition: all .2s;
+  }
+  #hud .menuBtn:hover { color: #0ff; border-style: solid !important; }
+  #wrap { position: relative; }
+  #wrap canvas {
+    touch-action: none;
+    border: 3px solid #0ff;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0,255,255,.3), 0 12px 40px rgba(0,0,0,.6);
+    display: block;
+  }
+  #nextBox {
+    position: absolute; top: 10px; right: 10px; pointer-events: none;
+    background: rgba(5,5,12,.55); border: 1px solid rgba(0,255,255,.3);
+    border-radius: 8px; z-index: 4; padding: 4px; text-align: center;
+    font-size: 11px; color: #8ab; letter-spacing: 1px;
+  }
+  #flash {
+    position: absolute; inset: 3px; border-radius: 9px; pointer-events: none;
+    opacity: 0; background: radial-gradient(circle, rgba(255,255,255,.9), rgba(0,255,255,.4));
+    transition: opacity .12s; z-index: 6;
+  }
+  #overlay {
+    position: absolute; inset: 0; z-index: 10; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(5,5,12,.82); border-radius: 10px; gap: 14px;
+    text-align: center; padding: 20px;
+  }
+  #overlay.hidden { display: none; }
+  #overlay h2 { font-size: 26px; color: #0ff; text-shadow: 0 0 14px #0ff; letter-spacing: 4px; }
+  #overlay p { color: #aac; font-size: 13px; line-height: 1.8; }
+  #overlay .final { color: #ff0; font-size: 20px; text-shadow: 0 0 10px #ff0; }
+  #overlay button, #menu button {
+    font-family: inherit; font-size: 16px; letter-spacing: 3px; cursor: pointer;
+    padding: 12px 34px; color: #0ff; background: rgba(0,255,255,.08);
+    border: 2px solid #0ff; border-radius: 30px;
+    text-shadow: 0 0 8px #0ff; box-shadow: 0 0 18px rgba(0,255,255,.35);
+    transition: all .2s;
+  }
+  #overlay button:hover, #menu button:hover { background: rgba(0,255,255,.22); transform: scale(1.06); }
+
+  /* ===== menu de opções ===== */
+  #menu {
+    position: absolute; inset: 0; z-index: 12; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(5,5,12,.92); border-radius: 10px; gap: 10px;
+    padding: 16px; overflow-y: auto;
+  }
+  #menu.hidden { display: none; }
+  #menu h2 { font-size: 20px; color: #ff0; text-shadow: 0 0 12px #ff0; letter-spacing: 4px; margin-bottom: 4px; }
+  #menu .row {
+    display: flex; align-items: center; justify-content: space-between;
+    width: min(380px, 90%); font-size: 13px; color: #aac; gap: 10px;
+  }
+  #menu .row label { flex: 1; }
+  #menu input[type=number] {
+    width: 72px; font-family: inherit; font-size: 14px; text-align: center;
+    color: #0ff; background: rgba(0,255,255,.06); border: 1px solid rgba(0,255,255,.4);
+    border-radius: 8px; padding: 5px;
+  }
+  #menu input[type=checkbox] { width: 18px; height: 18px; accent-color: #0ff; }
+  #menu .btns { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+  #menu .btns button { font-size: 13px; padding: 9px 22px; }
+  #menu .btns .reset { color: #f80; border-color: #f80; text-shadow: 0 0 8px #f80; box-shadow: 0 0 14px rgba(255,136,0,.3); }
+  #menu .hint { font-size: 11px; color: #678; max-width: 380px; text-align: center; line-height: 1.6; }
+
+  #controls { margin-top: 10px; font-size: 12px; color: #678; text-align: center; line-height: 1.7; max-width: 640px; }
+  #controls b { color: #9bc; }
+  #touchpad { display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; max-width: 480px; }
+  #touchpad button {
+    font-family: inherit; font-size: 13px; color: #0ff; cursor: pointer;
+    background: rgba(0,255,255,.07); border: 1px solid rgba(0,255,255,.4);
+    border-radius: 10px; padding: 12px 14px; min-width: 64px;
+    text-shadow: 0 0 6px #0ff; user-select: none; touch-action: manipulation;
+  }
+  @media (pointer: coarse) { #touchpad { display: flex; } #controls { display: none; } }
+</style>
+</head>
+<body>
+<h1>TETRIS NEON 3D</h1>
+<div id="hud">
+  <span class="score">PONTOS <b id="score">0</b></span>
+  <span class="hiscore">RECORDE <b id="hiscore">0</b></span>
+  <span class="level">NÍVEL <b id="level">1</b></span>
+  <span class="layers">CAMADAS <b id="layers">0</b></span>
+  <span class="menuBtn" id="menuBtn">OPÇÕES</span>
+</div>
+<div id="wrap">
+  <div id="nextBox">PRÓXIMA<canvas id="nextCanvas" width="90" height="90"></canvas></div>
+  <div id="flash"></div>
+  <div id="overlay">
+    <h2>TETRIS NEON 3D</h2>
+    <p>Peças caem dentro do poço.<br>Complete uma camada horizontal inteira para limpá-la!</p>
+    <button id="startBtn">JOGAR</button>
+  </div>
+  <div id="menu" class="hidden"></div>
+</div>
+<div id="controls">
+  <b>← → ↑ ↓</b> mover &nbsp;|&nbsp; <b>Q/E</b> girar eixo Y &nbsp;|&nbsp; <b>W/S</b> girar eixo X &nbsp;|&nbsp; <b>A/D</b> girar eixo Z<br>
+  <b>ESPAÇO</b> queda instantânea &nbsp;|&nbsp; <b>SHIFT</b> descer rápido &nbsp;|&nbsp; <b>arrastar com mouse</b> orbitar câmera &nbsp;|&nbsp; <b>P</b> pausar &nbsp;|&nbsp; <b>M</b> opções
+</div>
+<div id="touchpad">
+  <button data-act="left">◀</button>
+  <button data-act="fwd">▲</button>
+  <button data-act="back">▼</button>
+  <button data-act="right">▶</button>
+  <button data-act="rotY">↻ Y</button>
+  <button data-act="rotX">↻ X</button>
+  <button data-act="rotZ">↻ Z</button>
+  <button data-act="drop">DROP</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+/* ============================================================
+   CONFIG — tudo que é customizável sem programar.
+   Edite, salve e dê F5 no navegador.
+   ATENÇÃO: o menu OPÇÕES dentro do jogo salva no navegador
+   (localStorage) e TEM PRIORIDADE sobre estes valores — se uma
+   edição sua não aparecer, clique em OPÇÕES → PADRÃO.
+   ============================================================ */
+const CONFIG = {
+  wellWidth: 5,          // largura do poço (células no eixo X)
+  wellDepth: 5,          // profundidade do poço (células no eixo Z)
+  wellHeight: 12,        // altura do poço (células no eixo Y)
+
+  dropInterval: 900,     // ms entre quedas no nível 1 (menor = mais rápido)
+  minInterval: 180,      // velocidade máxima (ms mínimo entre quedas)
+  speedupStep: 90,       // quantos ms mais rápido a cada nível
+  layersPerLevel: 4,     // camadas limpas para subir de nível
+  fastDropFactor: 10,    // multiplicador de velocidade com SHIFT apertado
+
+  hardDropPoints: 2,     // pontos por célula descida com ESPAÇO
+  layerPoints: [0, 100, 300, 600, 1000], // pontos por 1, 2, 3, 4+ camadas de uma vez (x nível)
+
+  ghostPiece: true,      // mostra a "sombra" de onde a peça vai cair
+  showNext: true,        // mostra a prévia da próxima peça
+
+  // As peças! cells = cubinhos em coordenadas relativas [x, y, z].
+  // weight = chance de aparecer (maior = mais comum). color em hex 0xRRGGBB.
+  // Adicione as suas: qualquer conjunto de cubinhos conectados funciona.
+  pieces: [
+    { name: "I",      color: 0x00ffff, weight: 3, cells: [[0,0,0],[1,0,0],[2,0,0],[3,0,0]] },
+    { name: "O",      color: 0xffff00, weight: 3, cells: [[0,0,0],[1,0,0],[0,0,1],[1,0,1]] },
+    { name: "T",      color: 0xb04cff, weight: 3, cells: [[0,0,0],[1,0,0],[2,0,0],[1,0,1]] },
+    { name: "L",      color: 0xff9900, weight: 3, cells: [[0,0,0],[1,0,0],[2,0,0],[0,0,1]] },
+    { name: "S",      color: 0x00ff66, weight: 3, cells: [[0,0,0],[1,0,0],[1,0,1],[2,0,1]] },
+    { name: "tripé",  color: 0xff5577, weight: 2, cells: [[0,0,0],[1,0,0],[0,0,1],[0,1,0]] },
+    { name: "torção", color: 0x4488ff, weight: 2, cells: [[0,0,0],[1,0,0],[1,0,1],[1,1,1]] },
+  ],
+};
+
+/* o menu OPÇÕES salva por cima do CONFIG (localStorage tem prioridade) */
+const CFG_KEY = 'tetris3d-cfg';
+const DEFAULTS = JSON.parse(JSON.stringify(CONFIG));
+try {
+  const saved = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+  for (const k in saved) if (k in CONFIG && k !== 'pieces') CONFIG[k] = saved[k];
+} catch (e) {}
+
+/* dimensões ativas (relidas em cada início de jogo) */
+let W = CONFIG.wellWidth, D = CONFIG.wellDepth, H = CONFIG.wellHeight;
+
+/* ================= ESTADO ================= */
+let grid, piece, nextPiece = null, score, hiscore, level, layersCleared;
+let dropTimer = 0, dropInterval = CONFIG.dropInterval, fastDrop = false;
+let running = false, paused = false, gameOver = false;
+
+hiscore = +(localStorage.getItem('tetris3d-hi') || 0);
+document.getElementById('hiscore').textContent = hiscore;
+
+/* ================= THREE.JS — CENA ================= */
+const SIZE = Math.min(620, window.innerWidth - 40);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(SIZE, Math.round(SIZE * 1.05));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.getElementById('wrap').prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0a0a14, 0.012);
+
+const camera = new THREE.PerspectiveCamera(48, SIZE / (SIZE * 1.05), 0.1, 200);
+
+scene.add(new THREE.AmbientLight(0x404060, 2));
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+keyLight.position.set(8, 18, 10);
+scene.add(keyLight);
+const fillLight = new THREE.PointLight(0x00ffff, 30, 40);
+scene.add(fillLight);
+
+// centro do poço na origem; célula (x,y,z) -> mundo
+const cx = v => v - (W - 1) / 2;
+const cz = v => v - (D - 1) / 2;
+
+/* poço: grade neon nas paredes e fundo — reconstruído quando as dimensões mudam */
+const wellGroup = new THREE.Group();
+scene.add(wellGroup);
+function buildWell() {
+  wellGroup.clear();
+  const mat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.28 });
+  const matB = new THREE.LineBasicMaterial({ color: 0xb04cff, transparent: true, opacity: 0.5 });
+  const pts = [];
+  const x0 = -W / 2, x1 = W / 2, z0 = -D / 2, z1 = D / 2;
+  for (let i = 0; i <= W; i++) pts.push(new THREE.Vector3(x0 + i, 0, z0), new THREE.Vector3(x0 + i, 0, z1));
+  for (let i = 0; i <= D; i++) pts.push(new THREE.Vector3(x0, 0, z0 + i), new THREE.Vector3(x1, 0, z0 + i));
+  for (let i = 0; i <= W; i++) {
+    pts.push(new THREE.Vector3(x0 + i, 0, z0), new THREE.Vector3(x0 + i, H, z0));
+    pts.push(new THREE.Vector3(x0 + i, 0, z1), new THREE.Vector3(x0 + i, H, z1));
+  }
+  for (let i = 1; i < D; i++) {
+    pts.push(new THREE.Vector3(x0, 0, z0 + i), new THREE.Vector3(x0, H, z0 + i));
+    pts.push(new THREE.Vector3(x1, 0, z0 + i), new THREE.Vector3(x1, H, z0 + i));
+  }
+  const g = new THREE.BufferGeometry().setFromPoints(pts);
+  wellGroup.add(new THREE.LineSegments(g, mat));
+  const ringPts = [];
+  for (let y = 1; y <= H; y++) {
+    ringPts.push(
+      new THREE.Vector3(x0, y, z0), new THREE.Vector3(x1, y, z0),
+      new THREE.Vector3(x1, y, z0), new THREE.Vector3(x1, y, z1),
+      new THREE.Vector3(x1, y, z1), new THREE.Vector3(x0, y, z1),
+      new THREE.Vector3(x0, y, z1), new THREE.Vector3(x0, y, z0)
+    );
+  }
+  const g2 = new THREE.BufferGeometry().setFromPoints(ringPts);
+  wellGroup.add(new THREE.LineSegments(g2, matB));
+  fillLight.position.set(0, H + 4, 0);
+}
+buildWell();
+
+/* estrelas de fundo */
+(function stars() {
+  const n = 300, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n * 3; i++) pos[i] = (Math.random() - 0.5) * 120;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0x8899ff, size: 0.25, transparent: true, opacity: 0.7 })));
+})();
+
+const cubeGeo = new THREE.BoxGeometry(0.92, 0.92, 0.92);
+const edgeGeo = new THREE.EdgesGeometry(cubeGeo);
+const mats = {}, edgeMats = {}, ghostMats = {};
+function matFor(c) {
+  if (!mats[c]) {
+    mats[c] = new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 0.35, roughness: 0.3, metalness: 0.4 });
+    edgeMats[c] = new THREE.LineBasicMaterial({ color: c });
+    ghostMats[c] = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.13, depthWrite: false });
+  }
+}
+function makeCube(color, ghost = false) {
+  matFor(color);
+  const m = new THREE.Mesh(cubeGeo, ghost ? ghostMats[color] : mats[color]);
+  if (!ghost) m.add(new THREE.LineSegments(edgeGeo, edgeMats[color]));
+  return m;
+}
+
+const stackGroup = new THREE.Group();  scene.add(stackGroup);
+const pieceGroup = new THREE.Group();  scene.add(pieceGroup);
+const ghostGroup = new THREE.Group();  scene.add(ghostGroup);
+
+/* ================= CÂMERA ORBITAL ================= */
+let camTheta = Math.PI / 4, camPhi = 1.05, camDist = 16;
+function fitCamera() {
+  camDist = Math.max(12, Math.max(W, D) * 2.6, H * 1.5 + 3);
+}
+function updateCamera() {
+  const y = H * 0.45 + Math.cos(camPhi) * camDist;
+  camera.position.set(
+    Math.sin(camTheta) * Math.sin(camPhi) * camDist,
+    y,
+    Math.cos(camTheta) * Math.sin(camPhi) * camDist
+  );
+  camera.lookAt(0, H * 0.38, 0);
+}
+fitCamera(); updateCamera();
+
+let dragging = false, lastX = 0, lastY = 0;
+const cnv = renderer.domElement;
+cnv.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+window.addEventListener('pointerup', () => dragging = false);
+window.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  camTheta -= (e.clientX - lastX) * 0.008;
+  camPhi = Math.max(0.5, Math.min(1.45, camPhi - (e.clientY - lastY) * 0.005));
+  lastX = e.clientX; lastY = e.clientY;
+  updateCamera();
+});
+cnv.addEventListener('wheel', e => {
+  e.preventDefault();
+  camDist = Math.max(8, Math.min(40, camDist + e.deltaY * 0.01));
+  updateCamera();
+}, { passive: false });
+
+/* ================= LÓGICA ================= */
+function emptyGrid() {
+  return Array.from({ length: H }, () => Array.from({ length: D }, () => new Array(W).fill(null)));
+}
+
+// sorteio ponderado pelo weight de cada peça
+function randomPieceDef() {
+  const total = CONFIG.pieces.reduce((s, p) => s + (p.weight || 1), 0);
+  let r = Math.random() * total;
+  for (const p of CONFIG.pieces) {
+    r -= (p.weight || 1);
+    if (r <= 0) return p;
+  }
+  return CONFIG.pieces[0];
+}
+
+function newPiece() {
+  const def = nextPiece || randomPieceDef();
+  nextPiece = randomPieceDef();
+  drawNext();
+  const cells = def.cells.map(c => [...c]);
+  const maxX = Math.max(...cells.map(c => c[0]));
+  const maxZ = Math.max(...cells.map(c => c[2]));
+  const p = {
+    cells, color: def.color,
+    x: Math.floor((W - maxX - 1) / 2),
+    y: H - 1 - Math.max(...cells.map(c => c[1])),
+    z: Math.floor((D - maxZ - 1) / 2),
+  };
+  if (collides(p, 0, 0, 0)) { endGame(); return null; }
+  return p;
+}
+
+function cellsOf(p, dx = 0, dy = 0, dz = 0) {
+  return p.cells.map(([x, y, z]) => [x + p.x + dx, y + p.y + dy, z + p.z + dz]);
+}
+
+function collides(p, dx, dy, dz) {
+  for (const [x, y, z] of cellsOf(p, dx, dy, dz)) {
+    if (x < 0 || x >= W || z < 0 || z >= D || y < 0) return true;
+    if (y < H && grid[y][z][x]) return true;
+  }
+  return false;
+}
+
+function tryMove(dx, dy, dz) {
+  if (!piece || !running || paused) return false;
+  if (!collides(piece, dx, dy, dz)) {
+    piece.x += dx; piece.y += dy; piece.z += dz;
+    renderPiece();
+    return true;
+  }
+  return false;
+}
+
+// rotaciona em torno do eixo dado (90°), com "kick" simples
+function tryRotate(axis) {
+  if (!piece || !running || paused) return;
+  const rotated = piece.cells.map(([x, y, z]) => {
+    if (axis === 'y') return [z, y, -x];
+    if (axis === 'x') return [x, z, -y];
+    return [y, -x, z]; // z
+  });
+  const minX = Math.min(...rotated.map(c => c[0]));
+  const minY = Math.min(...rotated.map(c => c[1]));
+  const minZ = Math.min(...rotated.map(c => c[2]));
+  const norm = rotated.map(([x, y, z]) => [x - minX, y - minY, z - minZ]);
+  const old = piece.cells;
+  piece.cells = norm;
+  const kicks = [[0,0,0],[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0],[2,0,0],[-2,0,0]];
+  for (const [kx, ky, kz] of kicks) {
+    if (!collides(piece, kx, ky, kz)) {
+      piece.x += kx; piece.y += ky; piece.z += kz;
+      renderPiece();
+      return;
+    }
+  }
+  piece.cells = old; // falhou — desfaz
+}
+
+function hardDrop() {
+  if (!piece || !running || paused) return;
+  let d = 0;
+  while (!collides(piece, 0, -d - 1, 0)) d++;
+  piece.y -= d;
+  score += d * CONFIG.hardDropPoints;
+  lockPiece();
+}
+
+function lockPiece() {
+  for (const [x, y, z] of cellsOf(piece)) {
+    if (y >= H) { endGame(); return; }
+    grid[y][z][x] = piece.color;
+  }
+  clearLayers();
+  renderStack();
+  piece = newPiece();
+  renderPiece();
+  updateHud();
+}
+
+function clearLayers() {
+  let cleared = 0;
+  for (let y = H - 1; y >= 0; y--) {
+    if (grid[y].every(row => row.every(c => c))) {
+      grid.splice(y, 1);
+      grid.push(Array.from({ length: D }, () => new Array(W).fill(null)));
+      cleared++;
+    }
+  }
+  if (cleared) {
+    layersCleared += cleared;
+    const pts = CONFIG.layerPoints;
+    score += pts[Math.min(cleared, pts.length - 1)] * level;
+    const newLevel = 1 + Math.floor(layersCleared / CONFIG.layersPerLevel);
+    if (newLevel > level) {
+      level = newLevel;
+      dropInterval = Math.max(CONFIG.minInterval, CONFIG.dropInterval - (level - 1) * CONFIG.speedupStep);
+    }
+    const fl = document.getElementById('flash');
+    fl.style.opacity = 0.8;
+    setTimeout(() => fl.style.opacity = 0, 130);
+  }
+}
+
+function endGame() {
+  running = false; gameOver = true;
+  if (score > hiscore) { hiscore = score; localStorage.setItem('tetris3d-hi', hiscore); }
+  updateHud();
+  const ov = document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.innerHTML = `<h2>FIM DE JOGO</h2>
+    <p class="final">${score} PONTOS</p>
+    <p>Camadas limpas: ${layersCleared} · Nível ${level}</p>
+    <button id="startBtn">JOGAR DE NOVO</button>`;
+  document.getElementById('startBtn').onclick = startGame;
+}
+
+function startGame() {
+  // relê as dimensões do CONFIG (podem ter mudado no menu)
+  W = Math.max(3, Math.min(10, CONFIG.wellWidth | 0));
+  D = Math.max(3, Math.min(10, CONFIG.wellDepth | 0));
+  H = Math.max(6, Math.min(24, CONFIG.wellHeight | 0));
+  buildWell(); fitCamera(); updateCamera();
+  document.getElementById('nextBox').style.display = CONFIG.showNext ? '' : 'none';
+  grid = emptyGrid();
+  score = 0; level = 1; layersCleared = 0;
+  dropInterval = CONFIG.dropInterval; dropTimer = 0; nextPiece = null;
+  running = true; paused = false; gameOver = false;
+  document.getElementById('overlay').classList.add('hidden');
+  document.getElementById('menu').classList.add('hidden');
+  piece = newPiece();
+  renderStack(); renderPiece(); updateHud();
+}
+
+/* ================= RENDER DO JOGO ================= */
+function renderStack() {
+  stackGroup.clear();
+  for (let y = 0; y < H; y++)
+    for (let z = 0; z < D; z++)
+      for (let x = 0; x < W; x++) {
+        const c = grid[y][z][x];
+        if (!c) continue;
+        const m = makeCube(c);
+        m.position.set(cx(x), y + 0.5, cz(z));
+        stackGroup.add(m);
+      }
+}
+
+function renderPiece() {
+  pieceGroup.clear(); ghostGroup.clear();
+  if (!piece) return;
+  for (const [x, y, z] of cellsOf(piece)) {
+    if (y >= H) continue;
+    const m = makeCube(piece.color);
+    m.position.set(cx(x), y + 0.5, cz(z));
+    pieceGroup.add(m);
+  }
+  if (!CONFIG.ghostPiece) return;
+  let d = 0;
+  while (!collides(piece, 0, -d - 1, 0)) d++;
+  if (d > 0) for (const [x, y, z] of cellsOf(piece, 0, -d, 0)) {
+    const m = makeCube(piece.color, true);
+    m.position.set(cx(x), y + 0.5, cz(z));
+    ghostGroup.add(m);
+  }
+}
+
+function updateHud() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('hiscore').textContent = hiscore;
+  document.getElementById('level').textContent = level;
+  document.getElementById('layers').textContent = layersCleared;
+}
+
+/* próxima peça (canvas 2D, projeção isométrica simples) */
+function drawNext() {
+  const c = document.getElementById('nextCanvas');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+  if (!nextPiece || !CONFIG.showNext) return;
+  const cells = nextPiece.cells;
+  const col = '#' + nextPiece.color.toString(16).padStart(6, '0');
+  const s = 16, ox = 22, oy = 55;
+  const sorted = [...cells].sort((a, b) => (a[2] - b[2]) || (a[1] - b[1]));
+  for (const [x, y, z] of sorted) {
+    const px = ox + x * s + z * s * 0.5;
+    const py = oy - y * s + z * s * 0.3;
+    ctx.fillStyle = col;
+    ctx.globalAlpha = 0.85;
+    ctx.fillRect(px, py - s, s - 2, s - 2);
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 0.6;
+    ctx.strokeRect(px, py - s, s - 2, s - 2);
+  }
+}
+
+/* ================= MENU DE OPÇÕES ================= */
+/* Cada campo aponta para uma chave do CONFIG. Alterações são salvas
+   no localStorage e aplicadas no próximo "JOGAR". */
+const MENU_FIELDS = [
+  { key: 'wellWidth',     label: 'Largura do poço (3-10)',        type: 'num', min: 3, max: 10 },
+  { key: 'wellDepth',     label: 'Profundidade do poço (3-10)',   type: 'num', min: 3, max: 10 },
+  { key: 'wellHeight',    label: 'Altura do poço (6-24)',         type: 'num', min: 6, max: 24 },
+  { key: 'dropInterval',  label: 'Velocidade inicial (ms/queda)', type: 'num', min: 100, max: 3000 },
+  { key: 'speedupStep',   label: 'Aceleração por nível (ms)',     type: 'num', min: 0, max: 300 },
+  { key: 'layersPerLevel',label: 'Camadas para subir de nível',   type: 'num', min: 1, max: 20 },
+  { key: 'hardDropPoints',label: 'Pontos por célula no drop',     type: 'num', min: 0, max: 50 },
+  { key: 'ghostPiece',    label: 'Peça fantasma (sombra)',        type: 'bool' },
+  { key: 'showNext',      label: 'Mostrar próxima peça',          type: 'bool' },
+];
+
+function buildMenu() {
+  const m = document.getElementById('menu');
+  m.innerHTML = '<h2>OPÇÕES</h2>';
+  for (const f of MENU_FIELDS) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const lab = document.createElement('label');
+    lab.textContent = f.label;
+    row.appendChild(lab);
+    let input;
+    if (f.type === 'bool') {
+      input = document.createElement('input');
+      input.type = 'checkbox';
+      input.checked = !!CONFIG[f.key];
+      input.onchange = () => { CONFIG[f.key] = input.checked; saveCfg(); };
+    } else {
+      input = document.createElement('input');
+      input.type = 'number';
+      input.min = f.min; input.max = f.max;
+      input.value = CONFIG[f.key];
+      input.onchange = () => {
+        let v = +input.value;
+        if (isNaN(v)) v = DEFAULTS[f.key];
+        v = Math.max(f.min, Math.min(f.max, v));
+        input.value = v;
+        CONFIG[f.key] = v;
+        saveCfg();
+      };
+    }
+    row.appendChild(input);
+    m.appendChild(row);
+  }
+  const hint = document.createElement('p');
+  hint.className = 'hint';
+  hint.textContent = 'As mudanças valem a partir do próximo JOGAR. Peças novas e pontuação por camada editam-se no bloco CONFIG do arquivo (veja o README).';
+  m.appendChild(hint);
+  const btns = document.createElement('div');
+  btns.className = 'btns';
+  const ok = document.createElement('button');
+  ok.textContent = 'FECHAR';
+  ok.onclick = toggleMenu;
+  const reset = document.createElement('button');
+  reset.className = 'reset';
+  reset.textContent = 'PADRÃO';
+  reset.onclick = () => {
+    localStorage.removeItem(CFG_KEY);
+    for (const k in DEFAULTS) if (k !== 'pieces') CONFIG[k] = DEFAULTS[k];
+    buildMenu();
+  };
+  btns.appendChild(ok); btns.appendChild(reset);
+  m.appendChild(btns);
+}
+
+function saveCfg() {
+  const out = {};
+  for (const f of MENU_FIELDS) out[f.key] = CONFIG[f.key];
+  localStorage.setItem(CFG_KEY, JSON.stringify(out));
+}
+
+function toggleMenu() {
+  const m = document.getElementById('menu');
+  const opening = m.classList.contains('hidden');
+  if (opening) { buildMenu(); paused = running; }
+  else if (running) paused = false;
+  m.classList.toggle('hidden');
+}
+document.getElementById('menuBtn').onclick = toggleMenu;
+
+/* ================= INPUT ================= */
+// movimento relativo à câmera: converte direção da tela para eixo do grid
+function camRelative(dirX, dirZ) {
+  const a = Math.round(camTheta / (Math.PI / 2)) * (Math.PI / 2);
+  const s = Math.round(Math.sin(a)), c = Math.round(Math.cos(a));
+  return [dirX * c + dirZ * s, -dirX * s + dirZ * c];
+}
+function move(dirX, dirZ) {
+  const [dx, dz] = camRelative(dirX, dirZ);
+  tryMove(dx, 0, dz);
+}
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'm' || e.key === 'M') { toggleMenu(); return; }
+  if (e.key === 'p' || e.key === 'P') {
+    if (running && document.getElementById('menu').classList.contains('hidden')) paused = !paused;
+    return;
+  }
+  if (!running || paused) return;
+  switch (e.key) {
+    case 'ArrowLeft':  e.preventDefault(); move(-1, 0); break;
+    case 'ArrowRight': e.preventDefault(); move(1, 0); break;
+    case 'ArrowUp':    e.preventDefault(); move(0, -1); break;
+    case 'ArrowDown':  e.preventDefault(); move(0, 1); break;
+    case 'q': case 'Q': tryRotate('y'); break;
+    case 'e': case 'E': tryRotate('y'); break;
+    case 'w': case 'W': tryRotate('x'); break;
+    case 's': case 'S': tryRotate('x'); break;
+    case 'a': case 'A': tryRotate('z'); break;
+    case 'd': case 'D': tryRotate('z'); break;
+    case ' ': e.preventDefault(); hardDrop(); break;
+    case 'Shift': fastDrop = true; break;
+  }
+});
+window.addEventListener('keyup', e => { if (e.key === 'Shift') fastDrop = false; });
+
+document.querySelectorAll('#touchpad button').forEach(b => {
+  b.addEventListener('click', () => {
+    const act = b.dataset.act;
+    if (act === 'left') move(-1, 0);
+    else if (act === 'right') move(1, 0);
+    else if (act === 'fwd') move(0, -1);
+    else if (act === 'back') move(0, 1);
+    else if (act === 'rotY') tryRotate('y');
+    else if (act === 'rotX') tryRotate('x');
+    else if (act === 'rotZ') tryRotate('z');
+    else if (act === 'drop') hardDrop();
+  });
+});
+
+document.getElementById('startBtn').onclick = startGame;
+
+/* ================= LOOP ================= */
+let lastT = performance.now();
+function loop(t) {
+  requestAnimationFrame(loop);
+  const dt = t - lastT; lastT = t;
+  if (running && !paused && piece) {
+    dropTimer += dt * (fastDrop ? CONFIG.fastDropFactor : 1);
+    if (dropTimer >= dropInterval) {
+      dropTimer = 0;
+      if (!tryMove(0, -1, 0)) lockPiece();
+    }
+  }
+  fillLight.intensity = 28 + Math.sin(t * 0.002) * 6;
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Cubo 3D</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: radial-gradient(ellipse at top, #141428 0%, #0a0a12 60%);
+    color: #eee;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 14px;
+    overflow-x: hidden;
+  }
+  h1 {
+    font-size: 28px;
+    letter-spacing: 7px;
+    background: linear-gradient(90deg, #0ff, #b04cff, #ff0, #0ff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 10px rgba(120,160,255,.6));
+    animation: titleShift 6s linear infinite;
+    margin-bottom: 8px;
+  }
+  @keyframes titleShift { to { background-position: 300% 0; } }
+  #hud { display: flex; gap: 24px; margin-bottom: 8px; font-size: 15px; align-items: center; }
+  #hud span { padding: 4px 14px; border-radius: 20px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+  #hud .score { color: #0f0; text-shadow: 0 0 8px #0f0; }
+  #hud .hiscore { color: #f0f; text-shadow: 0 0 8px #f0f; }
+  #hud .powerup { color: #ff0; text-shadow: 0 0 8px #ff0; border: none; background: none; }
+  #hud .reserve {
+    cursor: pointer; text-align: center; font-size: 13px; letter-spacing: 1px;
+    color: #8ab; user-select: none; transition: all .2s;
+    border: 1px dashed rgba(0,255,255,.45) !important;
+  }
+  #hud .reserve b { font-size: 19px; vertical-align: middle; }
+  #hud .reserve.full {
+    color: #ffd33d; text-shadow: 0 0 8px #ffd33d;
+    border: 1px solid #ffd33d !important;
+    animation: pulseBox 1.2s infinite;
+  }
+  @keyframes pulseBox {
+    0%, 100% { box-shadow: 0 0 8px rgba(255,211,61,.4); }
+    50% { box-shadow: 0 0 20px rgba(255,211,61,.9); }
+  }
+  /* festival de frutas: tudo brilha 🎉 */
+  body.festa { animation: festaGlow 1.4s infinite; }
+  @keyframes festaGlow {
+    0%, 100% { background: #2a1a3e; }
+    33% { background: #14303a; }
+    66% { background: #3a2a14; }
+  }
+  body.festa #wrap canvas { border-color: #ffd33d; box-shadow: 0 0 45px rgba(255,211,61,.55), 0 12px 40px rgba(0,0,0,.6); }
+  #minimap { /* cubo planificado em cruz */
+    position: absolute; top: 10px; right: 10px; pointer-events: none;
+    background: rgba(5,5,12,.55); border: 1px solid rgba(0,255,255,.3);
+    border-radius: 6px; z-index: 4;
+  }
+  #portalArrow { /* seta para o wormhole mais próximo fora da tela */
+    position: absolute; pointer-events: none; display: none; z-index: 5;
+    font-size: 24px; color: #c478ff; text-shadow: 0 0 10px #b04cff;
+  }
+  /* ----- seleção de modos ----- */
+  #modeSelect, #missionList {
+    position: absolute; inset: 3px; border-radius: 9px; z-index: 8;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(5,5,12,.93); gap: 14px; padding: 18px; overflow-y: auto;
+  }
+  #modeSelect h2, #missionList h2 { color: #0ff; letter-spacing: 4px; text-shadow: 0 0 14px #0ff; }
+  #modeSelect .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 92%; }
+  #modeSelect .card {
+    border: 1px solid rgba(0,255,255,.4); border-radius: 10px; padding: 14px;
+    cursor: pointer; background: rgba(255,255,255,.03); transition: all .15s;
+  }
+  #modeSelect .card:hover { border-color: #0ff; box-shadow: 0 0 16px rgba(0,255,255,.4); transform: translateY(-2px); }
+  #modeSelect .card h3 { font-size: 15px; margin-bottom: 6px; color: #fff; }
+  #modeSelect .card p { font-size: 12px; color: #9ab; line-height: 1.4; }
+  #modeSelect .hint { font-size: 11px; color: #667; }
+  #missionRows { width: 94%; display: flex; flex-direction: column; gap: 6px; }
+  .mrow {
+    display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px;
+    border: 1px solid rgba(176,76,255,.4); border-radius: 8px; cursor: pointer;
+    font-size: 12.5px; color: #cbd; background: rgba(255,255,255,.03);
+  }
+  .mrow:hover { border-color: #b04cff; box-shadow: 0 0 12px rgba(176,76,255,.4); }
+  .mrow.done { border-color: #4d6; color: #8fa; }
+  /* ----- HUD dos modos ----- */
+  #hungerWrap {
+    display: none; position: absolute; bottom: 10px; left: 10px; width: 170px; z-index: 4;
+    font-size: 11px; color: #fa0; text-shadow: 0 0 6px #fa0; pointer-events: none;
+  }
+  #hungerBar { height: 9px; border: 1px solid #fa0; border-radius: 5px; margin-top: 2px; overflow: hidden; }
+  #hungerFill { height: 100%; width: 100%; background: linear-gradient(90deg, #f40, #fa0); transition: width .2s; }
+  #missionHud {
+    display: none; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    z-index: 4; font-size: 12.5px; color: #ffd33d; text-shadow: 0 0 8px rgba(255,211,61,.7);
+    background: rgba(5,5,12,.6); border: 1px solid rgba(255,211,61,.4); border-radius: 14px;
+    padding: 4px 14px; pointer-events: none; white-space: nowrap;
+  }
+  #warpfx { /* túnel do buraco de minhoca */
+    position: absolute; inset: 3px; border-radius: 9px; pointer-events: none; opacity: 0;
+    background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(216,160,255,.85) 22%, rgba(176,76,255,.8) 45%, rgba(30,0,60,.97) 80%);
+  }
+  #wrap { position: relative; }
+  #wrap canvas {
+    touch-action: none; /* libera o swipe sem rolar a página */
+    border: 3px solid #0ff;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(0,255,255,.3), 0 12px 40px rgba(0,0,0,.6);
+    display: block;
+    cursor: grab;
+  }
+  #overlay {
+    position: absolute; inset: 3px; border-radius: 9px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(5,5,10,.72); pointer-events: none;
+    text-align: center;
+  }
+  #overlay h2 { font-size: 42px; letter-spacing: 6px; text-shadow: 0 0 24px currentColor; }
+  #overlay p { color: #bbb; margin-top: 12px; font-size: 14px; }
+  #ovRank { margin-top: 14px; font-size: 15px; color: #ffd33d; text-shadow: 0 0 8px rgba(255,211,61,.6); line-height: 1.7; }
+  #nameEntry { display: none; margin-top: 16px; pointer-events: auto; }
+  #nameEntry .congrats { color: #5f6; font-size: 14px; margin-bottom: 8px; text-shadow: 0 0 8px #5f6; }
+  #nameEntry input {
+    background: #111; color: #0ff; border: 1px solid #0ff; border-radius: 6px;
+    font-family: inherit; font-size: 16px; padding: 6px 10px; text-align: center;
+    text-transform: uppercase; width: 180px;
+  }
+  .floater {
+    position: absolute; pointer-events: none; font-weight: bold; font-size: 18px;
+    text-shadow: 0 0 8px currentColor; animation: floatUp 1s ease-out forwards;
+    transform: translate(-50%, -50%);
+  }
+  @keyframes floatUp { to { transform: translate(-50%, -220%); opacity: 0; } }
+  #flash {
+    position: absolute; inset: 3px; border-radius: 9px; background: #ff1e3c;
+    opacity: 0; pointer-events: none; transition: opacity .12s;
+  }
+  #controls { margin-top: 8px; font-size: 12px; color: #777; text-align: center; }
+  button {
+    background: linear-gradient(180deg, rgba(0,255,255,.12), rgba(0,255,255,.02));
+    border: 1px solid #0ff; border-radius: 8px; color: #0ff;
+    font-family: inherit; font-weight: bold; padding: 8px 20px; margin: 8px 4px 0;
+    cursor: pointer; text-shadow: 0 0 6px #0ff; transition: transform .1s, box-shadow .1s;
+  }
+  button:hover { box-shadow: 0 0 14px rgba(0,255,255,.5); transform: translateY(-1px); }
+  #menu { display: none; position: fixed; inset: 0; background: rgba(5,5,10,.92); align-items: center; justify-content: center; z-index: 10; }
+  #menu .panel {
+    border: 2px solid #b04cff; border-radius: 14px; box-shadow: 0 0 30px rgba(176,76,255,.4);
+    padding: 22px 30px; background: #0c0c18; max-height: 90vh; overflow-y: auto;
+  }
+  #menu h2 { color: #b04cff; text-shadow: 0 0 10px #b04cff; margin-bottom: 14px; letter-spacing: 3px; }
+  #menu label { display: flex; justify-content: space-between; gap: 24px; margin: 9px 0; font-size: 14px; align-items: center; }
+  #menu input[type=range] { width: 130px; accent-color: #0ff; }
+  #menu input[type=color] { width: 48px; height: 28px; background: none; border: 1px solid #444; cursor: pointer; }
+  #menu select, #menu input[type=number] { background: #111; color: #0ff; border: 1px solid #0ff; border-radius: 5px; font-family: inherit; padding: 2px 6px; }
+  #menu .val { color: #ff0; min-width: 36px; text-align: right; }
+</style>
+</head>
+<body>
+<h1>SNAKE CUBO 3D</h1>
+<div id="hud">
+  <span class="score">PONTOS: <b id="score">0</b></span>
+  <span class="hiscore">RECORDE: <b id="hiscore">0</b></span>
+  <span class="reserve" id="reserveBox" title="Power-up guardado — use com G ou toque aqui">RESERVA (G): <b id="reserveSlot">—</b></span>
+  <span class="powerup" id="powerupLabel"></span>
+  <span class="powerup" id="modeInfo"></span>
+</div>
+<div id="wrap">
+  <div id="flash"></div>
+  <div id="warpfx"></div>
+  <canvas id="minimap" width="122" height="160"></canvas>
+  <div id="portalArrow">➤</div>
+  <div id="hungerWrap">FOME<div id="hungerBar"><div id="hungerFill"></div></div></div>
+  <div id="missionHud"></div>
+  <div id="modeSelect">
+    <h2>ESCOLHA O MODO</h2>
+    <div class="cards">
+      <div class="card" data-mode="classic"><h3>🎮 CLÁSSICO</h3><p>O jogo completo: recordes, fantasma, festival e portais.</p></div>
+      <div class="card" data-mode="sandbox"><h3>🏖 SANDBOX</h3><p>Sem morte, 5x frutas e 2x power-ups. Brinque à vontade — nada conta recorde.</p></div>
+      <div class="card" data-mode="survival"><h3>🔥 SOBREVIVÊNCIA</h3><p>Velocidade crescente, fome que aperta e a Fúria das Pedras. Quanto tempo aguenta?</p></div>
+      <div class="card" data-mode="mission"><h3>🏆 DESAFIO</h3><p>8 missões com objetivos variados. <span id="missionCount"></span></p></div>
+    </div>
+    <div class="hint">Teclas 1–4 escolhem · Espaço = Clássico · Esc volta aqui a qualquer momento</div>
+  </div>
+  <div id="missionList">
+    <h2>MISSÕES</h2>
+    <div id="missionRows"></div>
+    <button id="btnBackModes">VOLTAR</button>
+  </div>
+  <div id="overlay">
+    <h2 id="ovTitle" style="color:#0ff">SNAKE CUBO 3D</h2>
+    <p id="ovSub">Espaço para começar · setas/WASD movem · arraste com o mouse para girar o cubo</p>
+    <div id="ovRank"></div>
+    <div id="nameEntry">
+      <div class="congrats">🏆 TOP 3! Registre seu nome:</div>
+      <input id="nameInput" maxlength="12" placeholder="SEU NOME">
+      <button id="btnName">SALVAR</button>
+    </div>
+  </div>
+</div>
+<div>
+  <button id="btnStart">JOGAR (Espaço)</button>
+  <button id="btnModes">MODOS (Esc)</button>
+  <button id="btnMenu">OPÇÕES (M)</button>
+</div>
+<div id="controls">A cobra anda na superfície do cubo — cruze as arestas! 🌀 = buraco de minhoca para outra face<br>Power-ups vão pra caixa reserva: use com <b>G</b> (ou toque na caixa) · No celular: swipe move, toque = início/pausa</div>
+
+<div id="menu">
+  <div class="panel">
+    <h2>OPÇÕES</h2>
+    <label>Velocidade <span><input type="range" id="optSpeed" min="3" max="15" step="1"> <span class="val" id="optSpeedVal"></span></span></label>
+    <label>Células por face <span><input type="range" id="optGrid" min="8" max="20" step="2"> <span class="val" id="optGridVal"></span></span></label>
+    <label>Sons <select id="optSound"><option value="true">Ligados</option><option value="false">Desligados</option></select></label>
+    <label>Música ambiente <select id="optMusic"><option value="true">Ligada</option><option value="false">Desligada</option></select></label>
+    <label>Cobra fantasma 👻 <select id="optGhost"><option value="true">Ligada</option><option value="false">Desligada</option></select></label>
+    <label>Minimapa <select id="optMinimap"><option value="true">Ligado</option><option value="false">Desligado</option></select></label>
+    <label>Obstáculos <select id="optObstacles"><option value="true">Ligados</option><option value="false">Desligados</option></select></label>
+    <label>Qtd. de obstáculos <span><input type="range" id="optObstacleCount" min="2" max="30" step="1"> <span class="val" id="optObstacleCountVal"></span></span></label>
+    <label>Power-ups <select id="optPowerups"><option value="true">Ligados</option><option value="false">Desligados</option></select></label>
+    <label>Novo power-up a cada (s) <span><input type="range" id="optPowerupEvery" min="2" max="20" step="1"> <span class="val" id="optPowerupEveryVal"></span></span></label>
+    <label>Máx. de power-ups <span><input type="range" id="optPowerupMax" min="1" max="6" step="1"> <span class="val" id="optPowerupMaxVal"></span></span></label>
+    <label>Máx. de portais 🌀 <span><input type="range" id="optPortalMax" min="0" max="4" step="1"> <span class="val" id="optPortalMaxVal"></span></span></label>
+    <label>Novo portal a cada (s) <span><input type="range" id="optPortalEvery" min="4" max="20" step="1"> <span class="val" id="optPortalEveryVal"></span></span></label>
+    <label>Skin da cobra <select id="optSkin">
+      <option value="bolas">🟢 Bolinhas</option>
+      <option value="continua">🐍 Contínua</option>
+      <option value="voxel">🟩 Voxel neon</option>
+      <option value="dourada" id="optSkinGold">🥇 Dourada</option>
+    </select></label>
+    <label>Tamanho inicial <input type="number" id="optStartLen" min="1" max="10" style="width:60px"></label>
+    <div style="text-align:center">
+      <button id="btnSave">SALVAR</button>
+      <button id="btnReset">PADRÃO</button>
+      <button id="btnClose">FECHAR</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+/* ============================================================
+   CONFIG — personalize o jogo aqui! (low code)
+   O menu de OPÇÕES sobrescreve e salva no navegador.
+   ============================================================ */
+const CONFIG = {
+  gridSize: 12,          // células por face do cubo (8 a 20)
+  speed: 6,              // passos por segundo
+  startLength: 3,        // tamanho inicial da cobra
+  growPerFood: 1,        // crescimento por fruta
+
+  // Power-ups — nascem sozinhos com o tempo, como os portais
+  powerupsEnabled: true,
+  powerupEvery: 4,       // um power-up novo a cada X segundos (se houver vaga)
+  powerupMax: 3,         // máximo de power-ups simultâneos no cubo
+  powerupDuration: 5,    // segundos de efeito
+  powerupLifetime: 10,   // segundos até sumir do mapa
+
+  // Portais buraco de minhoca 🌀 — aparecem e somem com o tempo
+  portalMax: 2,          // máximo de portais simultâneos no cubo
+  portalEvery: 8,        // um portal novo a cada X segundos (se houver vaga)
+  portalLifetime: 12,    // segundos até o portal colapsar
+
+  // Pontuação
+  foodPoints: 10,
+  bonusPoints: 50,
+  portalPoints: 15,      // bônus por coragem de entrar no portal
+
+  // Animação do buraco de minhoca
+  warpDuration: 1.8,     // segundos da viagem pelo portal
+
+  // Festival de frutas 🎉 (power-up): frutas 10x + pontos multiplicados
+  festivalDuration: 12,  // segundos de festival
+  festivalMin: 2,        // multiplicador mínimo de pontos por fruta
+  festivalMax: 5,        // multiplicador máximo
+
+  // Sons
+  soundEnabled: true,
+  soundVolume: 0.15,
+
+  // Música ambiente (pads etéreos gerados no navegador)
+  musicEnabled: true,
+  musicVolume: 0.05,     // bem suave; aumente se quiser mais presença
+
+  // Obstáculos (rochas na superfície)
+  obstaclesEnabled: true,
+  obstacleCount: 10,
+
+  // Modo Sobrevivência 🔥
+  hungerStart: 20,       // segundos de fome no início
+  hungerMin: 8,          // a janela de fome encurta até este mínimo
+  survivalAccel: 0.006,  // ganho de velocidade por segundo (0.006 = +60% após 100s)
+  furyEvery: 25,         // Fúria das Pedras a cada X segundos
+  furyWarn: 2,           // segundos de aviso antes das pedras andarem
+  furyDur: 6,            // segundos com as pedras se movendo
+
+  // Modo Sobrevivência 🔥
+  hungerStart: 20,       // segundos de fome no início
+  hungerMin: 8,          // a janela de fome encurta até este mínimo
+  survivalAccel: 0.006,  // ganho de velocidade por segundo (0.006 = +60% aos 100s)
+  furyEvery: 25,         // Fúria das Pedras a cada X segundos
+  furyWarn: 2,           // segundos de aviso antes da fúria
+  furyDur: 6,            // duração da fúria (pedras andando)
+
+  // Extras visuais e modos
+  trailEnabled: true,    // trilha térmica: quente na cabeça → fria na cauda
+  minimapEnabled: true,  // minimapa das 6 faces no canto
+  ghostEnabled: true,    // 👻 cobra fantasma repete sua run anterior — desvie!
+  ghostLength: 6,        // tamanho da cobra fantasma
+  ghostDelay: 12,        // passos de atraso do fantasma (evita morte injusta no início)
+  deathCineDur: 2.4,     // segundos da câmera lenta na morte
+
+  // Frutas: emoji, multiplicador e raridade (weight maior = mais comum)
+  fruits: [
+    { emoji: "🍎", mult: 1, weight: 5 },
+    { emoji: "🍒", mult: 2, weight: 3 },
+    { emoji: "🍇", mult: 3, weight: 2 },
+    { emoji: "🌟", mult: 5, weight: 1 },
+  ],
+
+  // Skin da cobra: "bolas" | "continua" | "voxel" | "dourada"
+  // (a dourada 🥇 só destrava ao completar as 8 missões do modo Desafio)
+  skin: "bolas",
+
+  colors: {
+    snakeBody: "#2ecc40",
+    cubeFace:  "#10102a",   // cor base das faces
+    cubeEdge:  "#00e5ff",   // borda neon das faces
+  },
+
+  powerupTypes: ["speed", "slow", "bonus", "ghost", "festa"],
+};
+/* ===================== fim do CONFIG ===================== */
+
+const $ = id => document.getElementById(id);
+let cfg = loadConfig();
+
+function loadConfig() {
+  const base = JSON.parse(JSON.stringify(CONFIG));
+  try {
+    const s = JSON.parse(localStorage.getItem("snakeCube3dConfig") || "{}");
+    delete s.fruits; const sc = s.colors || {}; delete s.colors;
+    Object.assign(base, s);
+    if (sc.snakeBody) base.colors.snakeBody = sc.snakeBody;
+  } catch (e) {}
+  return base;
+}
+
+// --- Sons retrô ---
+let audioCtx;
+function beep(freq, duration, type = "square", slideTo = null) {
+  if (!cfg.soundEnabled) return;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, audioCtx.currentTime + duration);
+  gain.gain.setValueAtTime(cfg.soundVolume, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+const SFX = {
+  eat:      () => beep(440, 0.1, "square", 880),
+  rare:     () => { beep(660, 0.07); setTimeout(() => beep(990, 0.1), 70); },
+  powerup:  () => { beep(523, 0.08); setTimeout(() => beep(784, 0.08), 80); setTimeout(() => beep(1047, 0.12), 160); },
+  portal:   () => beep(200, 0.4, "sine", 1600),
+  warp:     () => { beep(120, 1.1, "sine", 980); setTimeout(() => beep(980, 0.7, "sine", 140), 700); },
+  use:      () => { beep(700, 0.06); setTimeout(() => beep(1050, 0.1), 70); },
+  festa:    () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.13, "triangle"), i * 90)),
+  gameover: () => beep(330, 0.6, "sawtooth", 55),
+  start:    () => { beep(262, 0.08); setTimeout(() => beep(523, 0.12), 90); },
+};
+
+/* ---- Música ambiente: pads etéreos gerados em tempo real ----
+   Acordes longos com leve detune (som "orgânico"). No festival,
+   muda para acordes maiores, mais rápidos e com sininhos. */
+let musicOn = false, musicNext = 0, musicIdx = 0, mood = "calm";
+const CHORDS = { // [fundamental grave, tríade...] em Hz
+  calm:  [[110, 220, 261.63, 329.63], [87.31, 174.61, 220, 261.63],   // Am7 · Fmaj7
+          [98, 196, 246.94, 293.66], [82.41, 164.81, 207.65, 246.94]], // Gsus · Em
+  happy: [[130.81, 261.63, 329.63, 392], [174.61, 349.23, 440, 523.25], // C · F
+          [196, 392, 493.88, 587.33], [130.81, 329.63, 392, 523.25]],   // G · C/E
+};
+function padNote(freq, t0, dur, vol, type) {
+  const osc = audioCtx.createOscillator(), osc2 = audioCtx.createOscillator();
+  const g = audioCtx.createGain(), f = audioCtx.createBiquadFilter();
+  osc.type = type; osc2.type = type;
+  osc.frequency.value = freq; osc2.frequency.value = freq * 1.006;
+  f.type = "lowpass"; f.frequency.value = mood === "happy" ? 2400 : 1100;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0002), t0 + dur * 0.35);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(f); osc2.connect(f); f.connect(g); g.connect(audioCtx.destination);
+  osc.start(t0); osc2.start(t0); osc.stop(t0 + dur); osc2.stop(t0 + dur);
+}
+function musicTick() {
+  if (!musicOn || !cfg.musicEnabled || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  if (now < musicNext) return;
+  const chord = CHORDS[mood][musicIdx++ % 4];
+  const dur = mood === "happy" ? 4.6 : 7.5;
+  chord.forEach((f, i) => padNote(f, now + 0.02, dur, cfg.musicVolume * (i === 0 ? 1.2 : 0.8), mood === "happy" ? "triangle" : "sine"));
+  if (mood === "happy") // sininhos festivos por cima
+    for (let i = 0; i < 4; i++) padNote(chord[1 + (i % 3)] * 2, now + 0.4 + i * 0.85, 1.3, cfg.musicVolume * 0.8, "sine");
+  musicNext = now + (mood === "happy" ? 3.6 : 6);
+}
+function startMusic() {
+  if (!cfg.musicEnabled || musicOn) return;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicOn = true; musicNext = 0;
+}
+
+/* ================= THREE.JS — CENA ================= */
+const VIEW = Math.min(window.innerWidth - 36, 620);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(VIEW, VIEW);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const wrap = $("wrap");
+wrap.insertBefore(renderer.domElement, wrap.firstChild);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0a0a14, 0.012);
+const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 300);
+const ambLight = new THREE.AmbientLight(0x8888aa, 1.1);
+scene.add(ambLight);
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+scene.add(keyLight);
+
+// estrelas de fundo
+{
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(900);
+  for (let i = 0; i < 900; i++) pos[i] = (Math.random() - 0.5) * 240;
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0x8899ff, size: 0.5, transparent: true, opacity: 0.7 })));
+}
+
+let N = cfg.gridSize;          // células por face
+const half = () => N / 2;
+
+// --- textura de grade por face ---
+function faceTexture() {
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = 512;
+  const c = cv.getContext("2d");
+  c.fillStyle = cfg.colors.cubeFace; c.fillRect(0, 0, 512, 512);
+  const cell = 512 / N;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++)
+    if ((x + y) % 2 === 0) { c.fillStyle = "rgba(255,255,255,.035)"; c.fillRect(x * cell, y * cell, cell, cell); }
+  c.strokeStyle = "rgba(255,255,255,.06)"; c.lineWidth = 1;
+  for (let i = 0; i <= N; i++) {
+    c.beginPath(); c.moveTo(i * cell, 0); c.lineTo(i * cell, 512); c.stroke();
+    c.beginPath(); c.moveTo(0, i * cell); c.lineTo(512, i * cell); c.stroke();
+  }
+  c.strokeStyle = cfg.colors.cubeEdge; c.lineWidth = 10;
+  c.shadowColor = cfg.colors.cubeEdge; c.shadowBlur = 18;
+  c.strokeRect(5, 5, 502, 502);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = 4;
+  return tex;
+}
+
+let cubeMesh;
+function buildCube() {
+  if (cubeMesh) { scene.remove(cubeMesh); cubeMesh.geometry.dispose(); }
+  const mat = new THREE.MeshStandardMaterial({ map: faceTexture(), roughness: 0.85, metalness: 0.15 });
+  cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(N, N, N), mat);
+  scene.add(cubeMesh);
+}
+
+// --- sprites com emoji (frutas, power-ups, ícones) ---
+function emojiTexture(char) {
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = 128;
+  const c = cv.getContext("2d");
+  c.font = "100px serif"; c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillText(char, 64, 70);
+  return new THREE.CanvasTexture(cv);
+}
+function emojiSprite(char, scale = 1.3) {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: emojiTexture(char), transparent: true }));
+  sp.scale.set(scale, scale, 1);
+  return sp;
+}
+
+/* ============ GEOMETRIA NA SUPERFÍCIE DO CUBO ============
+   Cada célula vive numa face: posição p (Vector3, componente
+   na normal = N/2) + normal n. Andar para fora da face faz a
+   cobra "dobrar" a aresta: nova direção = -normal antiga,
+   nova normal = direção antiga. */
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const AXES = [V3(1,0,0), V3(-1,0,0), V3(0,1,0), V3(0,-1,0), V3(0,0,1), V3(0,0,-1)];
+
+function tangents(n) { // dois eixos tangentes de uma face
+  const t = [];
+  for (const a of AXES) if (Math.abs(a.dot(n)) < 0.5 && t.every(b => Math.abs(b.dot(a)) < 0.5)) t.push(a);
+  return t;
+}
+function randomCellOn(n) {
+  const [t1, t2] = tangents(n);
+  const a = Math.floor(Math.random() * N) + 0.5 - half();
+  const b = Math.floor(Math.random() * N) + 0.5 - half();
+  return n.clone().multiplyScalar(half()).addScaledVector(t1, a).addScaledVector(t2, b);
+}
+function key(p) { return `${Math.round(p.x * 2)},${Math.round(p.y * 2)},${Math.round(p.z * 2)}`; }
+function faceOf(p) { // normal da face em que a célula está
+  let best = AXES[0], bd = -1;
+  for (const a of AXES) { const d = p.dot(a); if (d > bd) { bd = d; best = a; } }
+  return best.clone();
+}
+
+/* ================= ESTADO DO JOGO ================= */
+let snake, prevPos, dirV, normalV, nextDir, growth, score, running = false, paused = false, dead = false;
+let food, powerups = [], obstacles = [], portals = [];
+let stepTimer = 0, stepInterval = 1, effect = null, effectTimer = 0, powerupClock = 0, portalClock = 0;
+let shakeT = 0, warp = null; // warp = animação de viagem pelo buraco de minhoca
+let deathCine = null;        // câmera lenta cinematográfica na morte
+let ghostPath = null, curRec = [], stepsTaken = 0; // 👻 trajeto da run anterior
+// ----- modos de jogo -----
+let mode = "classic", mission = null, pendingOver = null;
+let survivalTime = 0, hunger = 20, fury = null, furyClock = 0;
+let survivalBest = +(localStorage.getItem("snakeCube3dSurvivalBest") || 0);
+let missionsDone = JSON.parse(localStorage.getItem("snakeCube3dMissions") || "{}");
+function newStats() { return { fruits: 0, faces: new Set(), portals: 0, usedReserve: false, leftTurns: 0, straight: 0, time: 0 }; }
+let st = newStats();
+
+// ----- highscores top 3 (Clássico: pontos · Sobrevivência: tempo) -----
+function topKey() { return mode === "classic" ? "snakeCube3dTop_classic" : mode === "survival" ? "snakeCube3dTop_survival" : null; }
+function getTop(k) { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch (e) { return []; } }
+function qualifies(k, v) { const t = getTop(k); return v > 0 && (t.length < 3 || v > t[t.length - 1].v); }
+function addTop(k, name, v) {
+  const t = getTop(k);
+  t.push({ name, v });
+  t.sort((a, b) => b.v - a.v);
+  localStorage.setItem(k, JSON.stringify(t.slice(0, 3)));
+}
+function showRank(k, unit) {
+  $("ovRank").innerHTML = getTop(k).map((e, i) => `${["🥇", "🥈", "🥉"][i]} ${e.name} — ${e.v}${unit}`).join("<br>");
+}
+const goldUnlocked = () => MISSIONS.every(m => missionsDone[m.id]);
+let hiscore = +(localStorage.getItem("snakeCube3dHiscore") || 0);
+$("hiscore").textContent = hiscore;
+
+// câmera orbital: segue a cabeça, mas o mouse pode girar
+let camVec = V3(0, 0, 1), camUp = V3(1, 0, 0), camDist, manualUntil = 0;
+
+const occupied = () => {
+  const s = new Set(snake.map(c => key(c.p)));
+  obstacles.forEach(o => s.add(key(o.p)));
+  portals.forEach(o => s.add(key(o.p)));
+  powerups.forEach(o => s.add(key(o.p)));
+  if (food) s.add(key(food.p));
+  return s;
+};
+function freeCell() {
+  const occ = occupied();
+  for (let i = 0; i < 300; i++) {
+    const n = AXES[Math.floor(Math.random() * 6)];
+    const p = randomCellOn(n);
+    if (!occ.has(key(p))) return { p, n: n.clone() };
+  }
+  return null;
+}
+
+/* ----- meshes do jogo ----- */
+const FRUIT_EMOJIS = {};
+let foodSprite = null;
+const POWER_INFO = {
+  speed: { label: "⚡ VELOCIDADE", emoji: "⚡", color: 0xffe000 },
+  slow:  { label: "🐌 LENTIDÃO",  emoji: "🐌", color: 0x37b6ff },
+  bonus: { label: "★ +PONTOS",    emoji: "⭐", color: 0xff45e0 },
+  ghost: { label: "◌ FANTASMA",   emoji: "👻", color: 0xe8f4ff },
+  festa: { label: "🎉 FESTIVAL DE FRUTAS!", emoji: "🎉", color: 0xffa030 },
+};
+
+/* ----- caixa reserva: power-ups ficam guardados, use com G ----- */
+let reserve = null;
+function updateReserveUI() {
+  $("reserveSlot").textContent = reserve ? POWER_INFO[reserve].emoji : "—";
+  $("reserveBox").classList.toggle("full", !!reserve);
+}
+function activate(type) {
+  if (type === "bonus") {
+    score += cfg.bonusPoints;
+    updateScore();
+    floatText(snake[0].p, "+" + cfg.bonusPoints, "#ff45e0");
+    flashLabel(POWER_INFO.bonus.label);
+    return;
+  }
+  if (effect === "festa") stopFesta();
+  effect = type;
+  effectTimer = type === "festa" ? cfg.festivalDuration : cfg.powerupDuration;
+  $("powerupLabel").textContent = POWER_INFO[type].label;
+  if (type === "festa") { startFesta(); SFX.festa(); }
+}
+function useReserve() {
+  if (!reserve || !running || paused || dead || warp) return;
+  const t = reserve;
+  reserve = null;
+  st.usedReserve = true;
+  updateReserveUI();
+  activate(t);
+  SFX.use();
+}
+
+/* ----- festival de frutas 🎉: 10x frutas, pontos 2x a 5x ----- */
+let extraFoods = [];
+function spawnExtraFood() {
+  const cell = freeCell();
+  if (!cell) return;
+  const fruit = pickFruit();
+  const sprite = emojiSprite(fruit.emoji, 1.5);
+  sprite.position.copy(cell.p).addScaledVector(cell.n, 0.8);
+  scene.add(sprite);
+  extraFoods.push({ ...cell, fruit, sprite, born: performance.now() });
+}
+function startFesta() {
+  document.body.classList.add("festa");
+  scene.fog.color.set(0x241540);
+  for (let i = 0; i < 9; i++) spawnExtraFood(); // + a fruta normal = 10x
+}
+function stopFesta() {
+  document.body.classList.remove("festa");
+  scene.fog.color.set(0x0a0a14);
+  extraFoods.forEach(f => scene.remove(f.sprite));
+  extraFoods = [];
+}
+function eatFruit(fr, pos) {
+  let mult = fr.mult;
+  const happy = effect === "festa";
+  if (happy) mult *= cfg.festivalMin + Math.floor(Math.random() * (cfg.festivalMax - cfg.festivalMin + 1));
+  const pts = cfg.foodPoints * mult;
+  score += pts;
+  growth += cfg.growPerFood;
+  hunger = hungerMax(); // comer mata a fome
+  st.fruits++;
+  st.faces.add(`${snake[0].n.x},${snake[0].n.y},${snake[0].n.z}`);
+  burst(pos, happy || fr.mult >= 5 ? 0xffd33d : 0xff4060, 12 + mult * 3);
+  floatText(snake[0].p, "+" + pts + (happy ? " 🎉" : ""), happy || fr.mult >= 3 ? "#ffd33d" : "#ff7090");
+  updateScore();
+  (happy || fr.mult > 1) ? SFX.rare() : SFX.eat();
+}
+
+// cobra: pool de esferas + cabeça com olhos
+let bodyPool = [], headGroup, bodyMat, bellyMat;
+
+// 👻 cobra fantasma: esferas translúcidas seguindo o trajeto gravado
+const ghostMat = new THREE.MeshStandardMaterial({ color: 0xd0d8ff, transparent: true, opacity: 0.3, roughness: 0.7 });
+let ghostMeshes = [];
+function ghostCellsNow() { // células que o fantasma ocupa neste passo
+  if (!cfg.ghostEnabled || !ghostPath || mode === "mission") return []; // missões sem fantasma
+  const out = [];
+  for (let j = 0; j < cfg.ghostLength; j++) {
+    const idx = stepsTaken - cfg.ghostDelay - j; // o fantasma é um "eco" atrasado
+    if (idx >= 0 && idx < ghostPath.length) out.push(ghostPath[idx]);
+  }
+  return out;
+}
+function renderGhost() {
+  const cells = running || dead ? ghostCellsNow() : [];
+  while (ghostMeshes.length < cfg.ghostLength) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 10), ghostMat);
+    scene.add(m);
+    ghostMeshes.push(m);
+  }
+  ghostMeshes.forEach((m, j) => {
+    const c = cells[j];
+    m.visible = !!c;
+    if (c) m.position.copy(c.p).addScaledVector(c.n, 0.34);
+  });
+}
+function buildSnakeMaterials() {
+  const col = new THREE.Color(cfg.colors.snakeBody);
+  if (cfg.skin === "dourada") { // 🥇 metálica, reluzente
+    bodyMat = new THREE.MeshStandardMaterial({ color: 0xffd24a, metalness: 0.9, roughness: 0.22, emissive: 0x3a2a00, transparent: true });
+    bellyMat = new THREE.MeshStandardMaterial({ color: 0xfff0b0, metalness: 0.7, roughness: 0.3, transparent: true });
+  } else if (cfg.skin === "voxel") { // 🟩 cubos neon
+    bodyMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.3, metalness: 0.2, emissive: col.clone().multiplyScalar(0.25), transparent: true });
+    bellyMat = bodyMat;
+  } else {
+    bodyMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.45, metalness: 0.1, transparent: true });
+    bellyMat = new THREE.MeshStandardMaterial({ color: col.clone().lerp(new THREE.Color("#ffffff"), 0.55), roughness: 0.5, transparent: true });
+  }
+}
+function buildHead() {
+  if (headGroup) scene.remove(headGroup);
+  headGroup = new THREE.Group();
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.56, 24, 18), bodyMat);
+  skull.scale.set(1, 0.92, 1.15);
+  headGroup.add(skull);
+  for (const side of [-1, 1]) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.21, 16, 12),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
+    eye.position.set(side * 0.28, 0.32, 0.3);
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 8),
+      new THREE.MeshStandardMaterial({ color: 0x111122, roughness: 0.1 }));
+    pupil.position.set(side * 0.28, 0.36, 0.48);
+    headGroup.add(eye, pupil);
+  }
+  const tongue = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.5, 8),
+    new THREE.MeshStandardMaterial({ color: 0xff2050 }));
+  tongue.rotation.x = Math.PI / 2;
+  tongue.position.set(0, 0, 0.85);
+  tongue.name = "tongue";
+  headGroup.add(tongue);
+  scene.add(headGroup);
+}
+function bodySphere() { // um segmento do corpo, conforme a skin
+  let m;
+  if (cfg.skin === "voxel") {
+    m = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.72, 0.72), bodyMat);
+  } else {
+    m = new THREE.Mesh(new THREE.SphereGeometry(0.46, 18, 14), bodyMat);
+    if (bellyMat !== bodyMat) {
+      const belly = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 10), bellyMat);
+      belly.position.y = -0.18;
+      m.add(belly);
+    }
+  }
+  scene.add(m);
+  return m;
+}
+let tubeMesh = null; // skin "continua": corpo de tubo liso
+function clearTube() {
+  if (tubeMesh) { scene.remove(tubeMesh); tubeMesh.geometry.dispose(); tubeMesh = null; }
+}
+
+// partículas
+const MAXP = 400;
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(MAXP * 3), 3));
+pGeo.setAttribute("color", new THREE.BufferAttribute(new Float32Array(MAXP * 3), 3));
+const pPts = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.32, vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+scene.add(pPts);
+let particles = [];
+function burst(pos, colorHex, n = 16, speed = 7) {
+  const c = new THREE.Color(colorHex);
+  for (let i = 0; i < n && particles.length < MAXP; i++) {
+    const v = V3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize()
+      .multiplyScalar(speed * (0.4 + Math.random() * 0.8));
+    particles.push({ p: pos.clone(), v, life: 0.5 + Math.random() * 0.5, c });
+  }
+}
+
+function floatText(worldPos, text, cssColor) {
+  const v = worldPos.clone().project(camera);
+  if (v.z > 1) return;
+  const el = document.createElement("div");
+  el.className = "floater";
+  el.style.left = ((v.x + 1) / 2 * VIEW) + "px";
+  el.style.top = ((1 - v.y) / 2 * VIEW) + "px";
+  el.style.color = cssColor;
+  el.textContent = text;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+/* ----- spawn de itens ----- */
+function pickFruit() {
+  const total = cfg.fruits.reduce((a, f) => a + f.weight, 0);
+  let r = Math.random() * total;
+  for (const f of cfg.fruits) { r -= f.weight; if (r <= 0) return f; }
+  return cfg.fruits[0];
+}
+function spawnFood() {
+  const cell = freeCell();
+  if (!cell) return;
+  if (foodSprite) scene.remove(foodSprite);
+  const fruit = pickFruit();
+  foodSprite = emojiSprite(fruit.emoji, 1.5);
+  food = { ...cell, fruit, born: performance.now() };
+  foodSprite.position.copy(cell.p).addScaledVector(cell.n, 0.8);
+  scene.add(foodSprite);
+}
+function spawnPowerup() {
+  const max = mode === "sandbox" ? cfg.powerupMax * 2 : cfg.powerupMax;
+  if (!cfg.powerupsEnabled || powerups.length >= max) return;
+  const cell = freeCell();
+  if (!cell) return;
+  const type = cfg.powerupTypes[Math.floor(Math.random() * cfg.powerupTypes.length)];
+  const g = new THREE.Group();
+  g.add(emojiSprite(POWER_INFO[type].emoji, 1.3));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.06, 10, 32),
+    new THREE.MeshBasicMaterial({ color: POWER_INFO[type].color }));
+  ring.name = "ring";
+  g.add(ring);
+  g.position.copy(cell.p).addScaledVector(cell.n, 0.8);
+  ring.lookAt(g.position.clone().add(cell.n));
+  scene.add(g);
+  powerups.push({ ...cell, type, mesh: g, life: cfg.powerupLifetime });
+}
+const rockMatG = new THREE.MeshStandardMaterial({ color: 0x8a7f70, roughness: 0.95, flatShading: true });
+function spawnObstacles() {
+  obstacles.forEach(o => scene.remove(o.mesh));
+  obstacles = [];
+  if (!cfg.obstaclesEnabled || (mission && mission.noRocks)) return;
+  const rockMat = rockMatG;
+  for (let i = 0; i < cfg.obstacleCount; i++) {
+    const cell = freeCell();
+    if (!cell) break;
+    if (cell.n.z > 0.5 && Math.abs(cell.p.x) < 2.6 && Math.abs(cell.p.y) < 2.6) continue; // área de nascimento livre
+    const mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.45, 0), rockMat);
+    mesh.position.copy(cell.p).addScaledVector(cell.n, 0.3);
+    mesh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+    scene.add(mesh);
+    obstacles.push({ ...cell, mesh });
+  }
+}
+function spawnPortal() {
+  const cell = freeCell();
+  if (!cell) return;
+  const g = new THREE.Group();
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.12, 12, 40),
+    new THREE.MeshStandardMaterial({ color: 0xb04cff, emissive: 0x8020c0, emissiveIntensity: 1.4, roughness: 0.3 }));
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.06, 10, 32),
+    new THREE.MeshStandardMaterial({ color: 0xe0a0ff, emissive: 0xc060ff, emissiveIntensity: 1.6 }));
+  const core = new THREE.Mesh(new THREE.SphereGeometry(0.2, 14, 10),
+    new THREE.MeshBasicMaterial({ color: 0xffffff }));
+  g.add(ring, ring2, core);
+  g.position.copy(cell.p).addScaledVector(cell.n, 0.55);
+  const look = g.position.clone().add(cell.n);
+  ring.lookAt(look); ring2.lookAt(look);
+  g.scale.setScalar(0.01);
+  scene.add(g);
+  portals.push({ ...cell, mesh: g, life: cfg.portalLifetime, born: performance.now() });
+  SFX.portal();
+}
+
+/* ================= MODOS DE JOGO ================= */
+const MISSIONS = [
+  { id: "m1", icon: "🔒", name: "Mãos atadas",  desc: "100 pontos sem usar a reserva (G)",  prog: () => `${score}/100`, check: () => score >= 100, fail: () => st.usedReserve },
+  { id: "m2", icon: "➡️", name: "Sempre à direita", desc: "80 pontos virando só à direita", prog: () => `${score}/80`,  check: () => score >= 80,  fail: () => st.leftTurns > 0 },
+  { id: "m3", icon: "⏱️", name: "Velocista",    desc: "Coma 5 frutas em 30 segundos",       prog: () => `${st.fruits}/5 · ${Math.max(0, 30 - st.time).toFixed(0)}s`, check: () => st.fruits >= 5 && st.time <= 30, fail: () => st.time > 30 },
+  { id: "m4", icon: "🏃", name: "Maratona",     desc: "Sobreviva 90s em alta velocidade",   prog: () => `${st.time.toFixed(0)}/90s`, check: () => st.time >= 90, speed: 11 },
+  { id: "m5", icon: "🧭", name: "Turista",      desc: "Coma 1 fruta em cada uma das 6 faces", prog: () => `${st.faces.size}/6 faces`, check: () => st.faces.size >= 6 },
+  { id: "m6", icon: "🌀", name: "Viajante",     desc: "Use 3 buracos de minhoca em 60s",    prog: () => `${st.portals}/3 · ${Math.max(0, 60 - st.time).toFixed(0)}s`, check: () => st.portals >= 3 && st.time <= 60, fail: () => st.time > 60, portalBoost: true },
+  { id: "m7", icon: "🌍", name: "Circum-navegação", desc: "48 passos seguidos sem virar",   prog: () => `${st.straight}/48`, check: () => st.straight >= 48, noRocks: true },
+  { id: "m8", icon: "🐍", name: "Anaconda",     desc: "Alcance 20 de comprimento",          prog: () => `${snake.length}/20`, check: () => snake.length >= 20 },
+];
+
+function showModeSelect() {
+  running = false; paused = false; mission = null;
+  deathCine = null; warp = null; $("warpfx").style.opacity = 0;
+  hideOverlay();
+  $("missionList").style.display = "none";
+  $("missionCount").textContent = `(${MISSIONS.filter(m => missionsDone[m.id]).length}/${MISSIONS.length} ✓)`;
+  $("modeSelect").style.display = "flex";
+}
+function startRun() {
+  $("modeSelect").style.display = "none";
+  $("missionList").style.display = "none";
+  resetGame();
+  running = true; paused = false;
+  hideOverlay();
+  SFX.start();
+  startMusic();
+  $("btnStart").textContent = "PAUSA (Espaço)";
+}
+function selectMode(m) {
+  mode = m;
+  if (m === "mission") openMissionList();
+  else { mission = null; startRun(); }
+}
+function openMissionList() {
+  $("modeSelect").style.display = "none";
+  const box = $("missionRows");
+  box.innerHTML = "";
+  for (const m of MISSIONS) {
+    const row = document.createElement("div");
+    row.className = "mrow" + (missionsDone[m.id] ? " done" : "");
+    row.innerHTML = `<span>${m.icon} <b>${m.name}</b> — ${m.desc}</span><span>${missionsDone[m.id] ? "✓" : ""}</span>`;
+    row.onclick = () => { mission = m; startRun(); };
+    box.appendChild(row);
+  }
+  $("missionList").style.display = "flex";
+}
+function missionEnd(ok) {
+  running = false; dead = true;
+  if (ok) {
+    missionsDone[mission.id] = true;
+    localStorage.setItem("snakeCube3dMissions", JSON.stringify(missionsDone));
+    burst(snake[0].p.clone().addScaledVector(snake[0].n, 0.5), 0x50ff80, 30, 9);
+    SFX.festa();
+    showOverlay("MISSÃO CUMPRIDA ✓", "#5f6", `${mission.name} · Esc escolhe outra · Espaço rejoga`);
+    if (goldUnlocked()) $("ovRank").innerHTML = "🥇 <b>SKIN DOURADA DESBLOQUEADA!</b><br>Ative no menu OPÇÕES (M)";
+  } else {
+    SFX.gameover();
+    showOverlay("MISSÃO FALHOU", "#f06", `${mission.desc} · Espaço tenta de novo · Esc volta`);
+  }
+}
+
+/* ----- Sobrevivência: fome + fúria das pedras ----- */
+const hungerMax = () => Math.max(cfg.hungerMin, cfg.hungerStart - survivalTime / 15);
+const speedFactor = () => mode === "survival" ? 1 + survivalTime * cfg.survivalAccel : 1;
+function furyTick(dt) {
+  if (!fury) {
+    furyClock += dt;
+    if (furyClock >= cfg.furyEvery && obstacles.length) {
+      fury = { phase: "warn", t: 0, moveT: 0 };
+      flashLabel("⚠ FÚRIA DAS PEDRAS!");
+      beep(80, 0.5, "sawtooth", 200);
+    }
+    return;
+  }
+  fury.t += dt;
+  rockMatG.emissive.setHex(0xff2000);
+  rockMatG.emissiveIntensity = (fury.phase === "active" ? 0.5 : 0.25) + 0.2 * Math.sin(performance.now() / 90);
+  if (fury.phase === "warn" && fury.t >= cfg.furyWarn) { fury.phase = "active"; fury.t = 0; }
+  else if (fury.phase === "active") {
+    fury.moveT += dt;
+    if (fury.moveT >= 0.8) { // as pedras dão um passo
+      fury.moveT = 0;
+      beep(70, 0.07, "square");
+      for (const o of obstacles) {
+        const [t1, t2] = tangents(o.n);
+        const d = [t1, t1.clone().negate(), t2, t2.clone().negate()][Math.floor(Math.random() * 4)];
+        const cand = o.p.clone().add(d);
+        if (Math.abs(cand.dot(t1)) > half() - 0.4 || Math.abs(cand.dot(t2)) > half() - 0.4) continue; // não sai da face
+        o.p.copy(cand);
+        o.mesh.position.copy(o.p).addScaledVector(o.n, 0.3);
+        burst(o.mesh.position, 0x8a7f70, 3, 2);
+        if (key(o.p) === key(snake[0].p) && mode !== "sandbox") { gameOver(); return; }
+      }
+    }
+    if (fury.t >= cfg.furyDur) {
+      fury = null; furyClock = 0;
+      rockMatG.emissive.setHex(0x000000);
+      rockMatG.emissiveIntensity = 0;
+    }
+  }
+}
+
+/* ================= LÓGICA ================= */
+function resetGame() {
+  if (cfg.skin === "dourada" && !goldUnlocked()) cfg.skin = "bolas"; // trava da dourada
+  N = cfg.gridSize;
+  buildCube();
+  buildSnakeMaterials();
+  buildHead();
+  bodyPool.forEach(m => scene.remove(m));
+  bodyPool = [];
+  clearTube();
+  portals.forEach(o => scene.remove(o.mesh));
+  portals = [];
+  if (foodSprite) { scene.remove(foodSprite); foodSprite = null; food = null; }
+  powerups.forEach(o => scene.remove(o.mesh));
+  powerups = [];
+  powerupClock = 0;
+
+  // cobra nasce na face +Z andando em +X
+  const nz = V3(0, 0, 1);
+  snake = [];
+  for (let i = 0; i < cfg.startLength; i++) {
+    const a = 0.5 - i; // cabeça à frente
+    snake.push({ p: V3(a - 0.0, 0.5, 0).setZ(half()).setX(a).setY(0.5), n: nz.clone() });
+  }
+  dirV = V3(1, 0, 0); normalV = nz.clone(); nextDir = dirV.clone();
+  prevPos = snake.map(c => c.p.clone());
+  growth = 0; score = 0; dead = false; effect = null;
+  portalClock = 0; shakeT = 0;
+  particles = [];
+  stopFesta();
+  warp = null; $("warpfx").style.opacity = 0;
+  reserve = null; updateReserveUI();
+  deathCine = null; pendingOver = null;
+  curRec = []; stepsTaken = 0;
+  // estado por modo
+  st = newStats();
+  survivalTime = 0; hunger = cfg.hungerStart; fury = null; furyClock = 0;
+  rockMatG.emissive.setHex(0x000000); rockMatG.emissiveIntensity = 0;
+  $("hungerWrap").style.display = mode === "survival" ? "block" : "none";
+  $("hungerFill").style.width = "100%";
+  $("missionHud").style.display = mode === "mission" && mission ? "block" : "none";
+  $("modeInfo").textContent = "";
+  $("score").textContent = 0;
+  $("powerupLabel").textContent = "";
+  camVec.copy(normalV); camUp.copy(dirV);
+  camDist = N * 2.4;
+  spawnObstacles();
+  spawnFood();
+  spawnPowerup(); // já começa com um power-up no cubo
+  if (mode === "sandbox") for (let i = 0; i < 4; i++) spawnExtraFood(); // 5x frutas
+}
+
+function tryTurn() {
+  if (Math.abs(nextDir.dot(normalV)) < 0.5 && nextDir.dot(dirV) > -0.5) {
+    if (nextDir.dot(dirV) < 0.5) { // virou de verdade
+      const side = normalV.clone().cross(dirV); // -side = direita na tela
+      if (nextDir.dot(side) > 0.5) st.leftTurns++;
+      st.straight = 0;
+    }
+    dirV = nextDir.clone();
+  }
+}
+
+function step() {
+  prevPos = snake.map(c => c.p.clone());
+  tryTurn();
+  let n = normalV.clone(), d = dirV.clone();
+  let cand = snake[0].p.clone().add(d);
+  // saiu da face? dobra a aresta
+  const axis = ["x", "y", "z"].find(a => Math.abs(d[a]) > 0.5);
+  if (Math.abs(cand[axis]) > half() - 0.49) {
+    const newD = n.clone().negate();
+    cand = snake[0].p.clone().addScaledVector(d, 0.5).addScaledVector(newD, 0.5);
+    n = d; d = newD;
+  }
+  normalV = n; dirV = d;
+
+  const ghost = effect === "ghost" || mode === "sandbox"; // sandbox: atravessa tudo
+  const k = key(cand);
+  if (!ghost && snake.some((c, i) => i > 0 && i < snake.length - 1 && key(c.p) === k)) return gameOver();
+  if (!ghost && obstacles.some(o => key(o.p) === k)) return gameOver();
+  // 👻 esbarrar no fantasma da run anterior mata (tolerância nos primeiros passos)
+  if (!ghost && stepsTaken > 8 && ghostCellsNow().some(c => key(c.p) === k)) return gameOver();
+
+  snake.unshift({ p: cand, n: normalV.clone() });
+  if (growth > 0) growth--; else snake.pop();
+  stepsTaken++;
+  st.straight++;
+  if (curRec.length < 6000) curRec.push({ p: snake[0].p.clone(), n: snake[0].n.clone() });
+
+  // portal 🌀 — inicia a viagem pelo buraco de minhoca (animação no loop)
+  const portal = portals.find(o => key(o.p) === k);
+  if (portal && !warp) {
+    scene.remove(portal.mesh);
+    portals = portals.filter(o => o !== portal);
+    burst(portal.mesh.position, 0xb04cff, 30, 10);
+    let dest = null; // o destino é sempre uma face diferente da atual
+    for (let i = 0; i < 20 && !dest; i++) {
+      const c = freeCell();
+      if (c && c.n.dot(normalV) < 0.5) dest = c;
+    }
+    warp = { t: 0, dur: cfg.warpDuration, dest, baseDist: camDist, done: false };
+    SFX.warp();
+  }
+
+  // frutas (a normal e as extras do festival)
+  const hk = key(snake[0].p);
+  if (food && hk === key(food.p)) {
+    eatFruit(food.fruit, foodSprite.position.clone());
+    scene.remove(foodSprite); foodSprite = null; food = null;
+    spawnFood();
+  }
+  const ef = extraFoods.find(f => key(f.p) === hk);
+  if (ef) {
+    eatFruit(ef.fruit, ef.sprite.position.clone());
+    scene.remove(ef.sprite);
+    extraFoods = extraFoods.filter(f => f !== ef);
+    if (effect === "festa" || mode === "sandbox") spawnExtraFood(); // festival/sandbox repõem a fruta
+  }
+
+  // power-up: vai pra caixa reserva (se cheia, ativa na hora)
+  const pu = powerups.find(o => key(o.p) === hk);
+  if (pu) {
+    burst(pu.mesh.position, POWER_INFO[pu.type].color, 20);
+    scene.remove(pu.mesh);
+    powerups = powerups.filter(o => o !== pu);
+    if (!reserve) {
+      reserve = pu.type;
+      updateReserveUI();
+      floatText(snake[0].p, POWER_INFO[pu.type].emoji + " guardado! (G)", "#9fd8ff");
+    } else {
+      activate(pu.type);
+    }
+    SFX.powerup();
+  }
+}
+
+let flashTimeout;
+function flashLabel(text) {
+  $("powerupLabel").textContent = text;
+  clearTimeout(flashTimeout);
+  flashTimeout = setTimeout(() => { if (!effect) $("powerupLabel").textContent = ""; }, 1500);
+}
+function updateScore() {
+  $("score").textContent = score;
+  if (mode === "classic" && score > hiscore) { // só o Clássico vale recorde de pontos
+    hiscore = score;
+    localStorage.setItem("snakeCube3dHiscore", hiscore);
+    $("hiscore").textContent = hiscore;
+  }
+}
+function gameOver() {
+  dead = true; running = false; shakeT = 0.7;
+  if (effect === "festa") stopFesta();
+  effect = null;
+  if (curRec.length > 10) ghostPath = curRec; // este trajeto assombra a próxima run
+  // texto do fim conforme o modo
+  if (mode === "survival") {
+    const t = Math.floor(survivalTime);
+    if (t > survivalBest) { survivalBest = t; localStorage.setItem("snakeCube3dSurvivalBest", t); }
+    pendingOver = { title: "FIM DA LINHA", sub: `Sobreviveu ${t}s · Recorde: ${survivalBest}s · Espaço reinicia · Esc modos` };
+  } else if (mode === "mission" && mission) {
+    pendingOver = { title: "MISSÃO FALHOU", sub: `${mission.desc} · Espaço tenta de novo · Esc volta` };
+  } else {
+    pendingOver = { title: "GAME OVER", sub: `Pontos: ${score} · Espaço para reiniciar · Esc modos` };
+  }
+  deathCine = { t: 0, dur: cfg.deathCineDur, baseDist: camDist }; // câmera lenta
+  burst(snake[0].p.clone().addScaledVector(snake[0].n, 0.5), 0xff3050, 36, 12);
+  $("flash").style.opacity = 0.35;
+  setTimeout(() => $("flash").style.opacity = 0, 180);
+  SFX.gameover();
+  $("btnStart").textContent = "JOGAR DE NOVO (Espaço)";
+}
+function currentSpeed() {
+  let s = cfg.speed * speedFactor(); // sobrevivência acelera com o tempo
+  if (mission && mission.speed) s = Math.max(s, mission.speed);
+  if (effect === "speed") s *= 1.6;
+  if (effect === "slow") s *= 0.55;
+  return s;
+}
+function showOverlay(title, color, sub) {
+  $("overlay").style.display = "flex";
+  $("ovTitle").textContent = title;
+  $("ovTitle").style.color = color;
+  $("ovSub").textContent = sub;
+  $("ovRank").innerHTML = "";
+  $("nameEntry").style.display = "none";
+}
+function maybeAskName() { // entrou no top 3? convida a assinar
+  const k = topKey();
+  if (!k) return;
+  const unit = mode === "survival" ? "s" : " pts";
+  const v = mode === "survival" ? Math.floor(survivalTime) : score;
+  if (qualifies(k, v)) {
+    $("nameEntry").style.display = "block";
+    $("nameInput").value = "";
+    $("nameInput").focus();
+    $("btnName").onclick = () => {
+      addTop(k, ($("nameInput").value.trim() || "ANÔNIMO").toUpperCase(), v);
+      $("nameEntry").style.display = "none";
+      showRank(k, unit);
+    };
+  } else {
+    showRank(k, unit);
+  }
+}
+function hideOverlay() { $("overlay").style.display = "none"; }
+
+/* ================= LOOP & RENDER ================= */
+let lastTime = 0;
+function loop(t) {
+  requestAnimationFrame(loop);
+  const dt = Math.min((t - lastTime) / 1000, 0.1) || 0;
+  lastTime = t;
+
+  // viagem pelo buraco de minhoca: o jogo "respira" enquanto a câmera mergulha
+  if (warp) {
+    warp.t += dt;
+    stepTimer = 0; // a cobra não anda durante a viagem
+    const f = Math.min(warp.t / warp.dur, 1);
+    $("warpfx").style.opacity = Math.pow(Math.sin(Math.PI * f), 1.5) * 0.95;
+    camDist = warp.baseDist * (1 - 0.55 * Math.sin(Math.PI * f));
+    camUp.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(camVec, dt * 6 * Math.sin(Math.PI * f))); // giro
+    if (!warp.done && f >= 0.5) {
+      warp.done = true;
+      if (warp.dest) { // o teleporte acontece no auge do clarão
+        const [t1, t2] = tangents(warp.dest.n);
+        dirV = (Math.random() < 0.5 ? t1 : t2).clone().multiplyScalar(Math.random() < 0.5 ? 1 : -1);
+        normalV = warp.dest.n.clone();
+        nextDir = dirV.clone();
+        snake[0] = { p: warp.dest.p.clone(), n: normalV.clone() };
+        prevPos = snake.map(c => c.p.clone());
+        score += cfg.portalPoints;
+        st.portals++;
+        updateScore();
+        burst(warp.dest.p.clone().addScaledVector(warp.dest.n, 0.5), 0xb04cff, 36, 10);
+        floatText(snake[0].p, "+" + cfg.portalPoints + " 🌀", "#d8a0ff");
+        SFX.portal();
+      }
+    }
+    if (warp.t >= warp.dur) {
+      camDist = warp.baseDist;
+      $("warpfx").style.opacity = 0;
+      warp = null;
+    }
+  } else if (running && !paused) {
+    stepTimer += dt;
+    stepInterval = 1 / currentSpeed();
+    while (stepTimer >= stepInterval && running && !warp) { stepTimer -= stepInterval; step(); }
+    if (effect) {
+      effectTimer -= dt;
+      if (effectTimer <= 0) {
+        if (effect === "festa") stopFesta();
+        effect = null;
+        $("powerupLabel").textContent = "";
+      }
+    }
+    // modos: sobrevivência (fome + fúria + acelerador) e missão (objetivos)
+    if (mode === "survival") {
+      survivalTime += dt;
+      hunger -= dt;
+      $("hungerFill").style.width = Math.max(0, hunger / hungerMax() * 100) + "%";
+      $("modeInfo").textContent = `⏱ ${survivalTime.toFixed(0)}s · ${speedFactor().toFixed(1)}x`;
+      if (hunger <= 0) { flashLabel("💀 FOME"); gameOver(); }
+      else furyTick(dt);
+    } else if (mode === "mission" && mission && running) {
+      st.time += dt;
+      $("missionHud").textContent = `${mission.icon} ${mission.desc} — ${mission.prog()}`;
+      if (mission.check()) missionEnd(true);
+      else if (mission.fail && mission.fail()) missionEnd(false);
+    }
+
+    // power-ups nascem sozinhos e expiram (sandbox: 2x mais)
+    powerupClock += dt;
+    if (powerupClock >= (mode === "sandbox" ? cfg.powerupEvery / 2 : cfg.powerupEvery)) {
+      powerupClock = 0;
+      spawnPowerup();
+    }
+    for (const o of [...powerups]) {
+      o.life -= dt;
+      if (o.life <= 0) {
+        scene.remove(o.mesh);
+        powerups = powerups.filter(x => x !== o);
+      }
+    }
+    // portais nascem e colapsam (missão Viajante: mais frequentes)
+    portalClock += dt;
+    if (portalClock >= (mission && mission.portalBoost ? Math.min(5, cfg.portalEvery) : cfg.portalEvery)) {
+      portalClock = 0;
+      if (portals.length < cfg.portalMax) spawnPortal();
+    }
+    for (const o of [...portals]) {
+      o.life -= dt;
+      if (o.life <= 0) {
+        burst(o.mesh.position, 0x8040c0, 12, 5);
+        scene.remove(o.mesh);
+        portals = portals.filter(x => x !== o);
+      }
+    }
+  }
+
+  // cinematográfica da morte: câmera lenta + zoom no local do acidente
+  if (deathCine) {
+    deathCine.t += dt;
+    const k = 1 - Math.exp(-2.5 * dt);
+    camDist += (N * 1.35 - camDist) * k;
+    camUp.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(camVec, dt * 0.45)); // órbita lenta
+    if (deathCine.t >= deathCine.dur) {
+      camDist = deathCine.baseDist;
+      deathCine = null;
+      const po = pendingOver || { title: "GAME OVER", sub: `Pontos: ${score} · Espaço para reiniciar` };
+      showOverlay(po.title, "#f06", po.sub);
+      maybeAskName();
+    }
+  }
+
+  // trilha térmica: partículas quentes na cabeça, frias na cauda
+  if (cfg.trailEnabled && running && !paused && !warp && snake && particles.length < MAXP - 8) {
+    for (let e = 0; e < 2; e++) {
+      const i = Math.floor(Math.random() * snake.length);
+      const f = i / Math.max(snake.length - 1, 1);
+      const col = new THREE.Color(0xffa040).lerp(new THREE.Color(0x4090ff), f);
+      particles.push({
+        p: snake[i].p.clone().addScaledVector(snake[i].n, 0.5),
+        v: snake[i].n.clone().multiplyScalar(0.5 + Math.random() * 0.8),
+        life: 0.3 + Math.random() * 0.3, c: col,
+      });
+    }
+  }
+
+  // partículas (em câmera lenta durante a cinematográfica)
+  const pdt = deathCine ? dt * 0.18 : dt;
+  for (const p of particles) { p.p.addScaledVector(p.v, pdt); p.v.multiplyScalar(1 - 1.5 * pdt); p.life -= pdt; }
+  particles = particles.filter(p => p.life > 0);
+  const posA = pGeo.attributes.position.array, colA = pGeo.attributes.color.array;
+  particles.forEach((p, i) => {
+    posA[i*3] = p.p.x; posA[i*3+1] = p.p.y; posA[i*3+2] = p.p.z;
+    colA[i*3] = p.c.r; colA[i*3+1] = p.c.g; colA[i*3+2] = p.c.b;
+  });
+  pGeo.setDrawRange(0, particles.length);
+  pGeo.attributes.position.needsUpdate = true;
+  pGeo.attributes.color.needsUpdate = true;
+
+  // clima do festival: luz pulsando e música feliz
+  mood = effect === "festa" ? "happy" : "calm";
+  ambLight.intensity = effect === "festa" ? 1.7 + 0.5 * Math.sin(t / 110) : 1.1;
+  musicTick();
+
+  renderSnake(t);
+  renderItems(t);
+  renderGhost();
+  updateCamera(t, dt);
+  renderer.render(scene, camera);
+  drawMinimap();
+  updatePortalArrow();
+}
+
+function surfaceLerp(a, b, f) { // interpola e re-projeta na superfície do cubo
+  if (a.distanceTo(b) > 1.6) return b.clone(); // teleporte (portal): sem lerp
+  const v = a.clone().lerp(b, f);
+  const m = Math.max(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z));
+  return v.multiplyScalar(half() / m);
+}
+
+function renderSnake(t) {
+  if (!snake) return;
+  const f = running && !paused ? Math.min(stepTimer / stepInterval, 1) : 1;
+  while (bodyPool.length < snake.length - 1) bodyPool.push(bodySphere());
+  bodyPool.forEach((m, i) => m.visible = i < snake.length - 1);
+
+  const ghostMode = effect === "ghost";
+  bodyMat.opacity = ghostMode ? 0.45 : 1;
+  bellyMat.opacity = ghostMode ? 0.45 : 1;
+
+  const pts = snake.map((c, i) => surfaceLerp(prevPos[i] || prevPos[prevPos.length - 1] || c.p, c.p, f));
+
+  if (cfg.skin === "continua") { // corpo único e liso (tubo refeito a cada quadro)
+    bodyPool.forEach(m => m.visible = false);
+    clearTube();
+    if (pts.length >= 2) {
+      const lifted = pts.map((p, i) => p.clone().addScaledVector(snake[i].n, 0.3));
+      const curve = new THREE.CatmullRomCurve3(lifted);
+      tubeMesh = new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(pts.length * 3, 8), 0.32, 8, false), bodyMat);
+      scene.add(tubeMesh);
+    }
+  } else {
+    clearTube();
+    for (let i = 1; i < snake.length; i++) {
+      const m = bodyPool[i - 1];
+      const taper = 1 - 0.4 * (i / snake.length);
+      const lift = 0.34 * taper;
+      m.position.copy(pts[i]).addScaledVector(snake[i].n, lift);
+      m.scale.setScalar(taper);
+      if (cfg.skin === "voxel") { // cubos girando lentamente
+        m.quaternion.setFromAxisAngle(snake[i].n, t / 600 + i * 0.5);
+      } else {
+        m.up.copy(snake[i].n);
+        m.lookAt(m.position.clone().add(snake[i].n)); // barriga voltada pra superfície
+      }
+    }
+  }
+
+  // cabeça orientada: z = direção, y = normal
+  const hp = pts[0].clone().addScaledVector(snake[0].n, 0.42);
+  headGroup.position.copy(hp);
+  const zA = dirV.clone(), yA = snake[0].n.clone(), xA = yA.clone().cross(zA);
+  headGroup.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xA, yA, zA));
+  const tongue = headGroup.getObjectByName("tongue");
+  tongue.visible = Math.floor(t / 900) % 3 === 0 && (t % 900) < 320 && !dead;
+}
+
+function renderItems(t) {
+  if (foodSprite) {
+    const pulse = 1.5 + 0.18 * Math.sin((t - food.born) / 180);
+    foodSprite.scale.set(pulse, pulse, 1);
+  }
+  for (const f of extraFoods) {
+    const pl = 1.4 + 0.25 * Math.sin((t - f.born) / 120);
+    f.sprite.scale.set(pl, pl, 1);
+  }
+  for (const o of powerups) {
+    o.mesh.getObjectByName("ring").rotation.z = t / 400;
+    o.mesh.visible = !(o.life < 2 && Math.floor(t / 150) % 2 === 0); // pisca antes de sumir
+  }
+  for (const o of portals) {
+    const age = (performance.now() - o.born) / 1000;
+    const grow = Math.min(age * 3, 1);
+    const fade = Math.min(o.life / 1.2, 1);
+    o.mesh.scale.setScalar(Math.max(0.01, grow * fade) * (1 + 0.08 * Math.sin(t / 150)));
+    o.mesh.children[0].rotation.z = t / 300;
+    o.mesh.children[1].rotation.z = -t / 180;
+  }
+}
+
+function updateCamera(t, dt) {
+  const auto = performance.now() > manualUntil;
+  if (auto && snake) {
+    const k = 1 - Math.exp(-2.6 * dt);
+    camVec.lerp(snake[0].n, k).normalize();
+    camUp.lerp(dirV, k);
+  }
+  // ortogonaliza o up em relação ao eixo da câmera
+  camUp.addScaledVector(camVec, -camUp.dot(camVec)).normalize();
+  let pos = camVec.clone().multiplyScalar(camDist);
+  if (shakeT > 0) {
+    shakeT = Math.max(0, shakeT - dt);
+    pos.addScaledVector(camUp, (Math.random() - 0.5) * shakeT * 2.4);
+  }
+  camera.position.copy(pos);
+  camera.up.copy(camUp);
+  camera.lookAt(0, 0, 0);
+  keyLight.position.copy(camera.position).addScaledVector(camUp, camDist * 0.5);
+}
+
+/* ============ MINIMAPA (cubo planificado em cruz) ============ */
+const mmCv = $("minimap"), mmCtx = mmCv.getContext("2d");
+const NET = { // posição [coluna, linha] de cada face na cruz
+  "0,1,0": [1, 0], "-1,0,0": [0, 1], "0,0,1": [1, 1], "1,0,0": [2, 1], "0,-1,0": [1, 2], "0,0,-1": [1, 3],
+};
+function mmPlot(p, n, color, r) {
+  const cell = NET[`${n.x},${n.y},${n.z}`];
+  if (!cell) return;
+  const fs = 38, [t1, t2] = tangents(n);
+  const u = (p.dot(t1) + half()) / N, v = (p.dot(t2) + half()) / N;
+  mmCtx.fillStyle = color;
+  mmCtx.beginPath();
+  mmCtx.arc(4 + cell[0] * fs + u * fs, 4 + cell[1] * fs + v * fs, r, 0, 7);
+  mmCtx.fill();
+}
+function drawMinimap() {
+  mmCv.style.display = cfg.minimapEnabled && snake ? "block" : "none";
+  if (!cfg.minimapEnabled || !snake) return;
+  const fs = 38;
+  mmCtx.clearRect(0, 0, mmCv.width, mmCv.height);
+  const headFace = `${snake[0].n.x},${snake[0].n.y},${snake[0].n.z}`;
+  for (const [face, [cx, cy]] of Object.entries(NET)) {
+    mmCtx.fillStyle = "rgba(255,255,255,.05)";
+    mmCtx.fillRect(4 + cx * fs, 4 + cy * fs, fs, fs);
+    mmCtx.strokeStyle = face === headFace ? "#00e5ff" : "rgba(0,229,255,.25)";
+    mmCtx.lineWidth = face === headFace ? 1.6 : 1;
+    mmCtx.strokeRect(4 + cx * fs, 4 + cy * fs, fs, fs);
+  }
+  obstacles.forEach(o => mmPlot(o.p, o.n, "#777", 1.5));
+  portals.forEach(o => mmPlot(o.p, o.n, "#c478ff", 3));
+  powerups.forEach(o => mmPlot(o.p, o.n, "#ffd33d", 2.5));
+  if (food) mmPlot(food.p, food.n, "#ff5070", 2.5);
+  extraFoods.forEach(f => mmPlot(f.p, f.n, "#ff5070", 2));
+  ghostCellsNow().forEach(c => mmPlot(c.p, c.n, "rgba(220,225,255,.5)", 1.8));
+  snake.forEach((c, i) => mmPlot(c.p, c.n, i === 0 ? "#5fff70" : "#1d8030", i === 0 ? 2.8 : 1.8));
+}
+
+/* ============ SETA PARA O WORMHOLE MAIS PRÓXIMO ============ */
+function updatePortalArrow() {
+  const el = $("portalArrow");
+  if (!portals.length || !snake || !running || paused) { el.style.display = "none"; return; }
+  const head = snake[0].p;
+  let best = portals[0], bd = Infinity;
+  for (const o of portals) {
+    const d = o.mesh.position.distanceTo(head);
+    if (d < bd) { bd = d; best = o; }
+  }
+  // visível só se a face do portal olha para a câmera E a projeção cai na tela
+  const facingCam = best.n.dot(camVec) > 0.15;
+  const v = best.mesh.position.clone().project(camera);
+  if (facingCam && v.z < 1 && Math.abs(v.x) < 0.9 && Math.abs(v.y) < 0.9) { el.style.display = "none"; return; }
+  // direção na tela via base da câmera (funciona mesmo com o portal atrás do cubo)
+  const right = camUp.clone().cross(camVec).normalize();
+  let x = best.mesh.position.dot(right), y = best.mesh.position.dot(camUp);
+  const m = Math.max(Math.abs(x), Math.abs(y));
+  if (m < 0.01) { el.style.display = "none"; return; }
+  x /= m; y /= m; // prende na borda do canvas
+  el.style.display = "block";
+  el.style.left = ((x * 0.88 + 1) / 2 * VIEW) + "px";
+  el.style.top = ((1 - (y * 0.88 + 1) / 2) * VIEW) + "px";
+  el.style.transform = `translate(-50%,-50%) rotate(${Math.atan2(-y, x)}rad)`;
+}
+
+/* ================= INPUT ================= */
+function screenDirOf(worldDir) { // direção tangente projetada na tela (NDC)
+  const h = snake[0].p.clone().addScaledVector(snake[0].n, 0.4);
+  const a = h.clone().project(camera);
+  const b = h.clone().add(worldDir).project(camera);
+  return { x: b.x - a.x, y: b.y - a.y };
+}
+const SCREEN_KEYS = {
+  ArrowUp: {x:0,y:1}, ArrowDown: {x:0,y:-1}, ArrowLeft: {x:-1,y:0}, ArrowRight: {x:1,y:0},
+  w: {x:0,y:1}, s: {x:0,y:-1}, a: {x:-1,y:0}, d: {x:1,y:0},
+};
+function steer(want) { // escolhe a direção tangente que mais aponta para "want" na tela
+  if (!running || paused || !snake || warp) return;
+  const side = normalV.clone().cross(dirV);
+  let best = null, bestDot = 0.15;
+  for (const c of [dirV.clone(), side.clone(), side.clone().negate()]) {
+    const sd = screenDirOf(c);
+    const len = Math.hypot(sd.x, sd.y) || 1;
+    const dot = (sd.x * want.x + sd.y * want.y) / len;
+    if (dot > bestDot) { bestDot = dot; best = c; }
+  }
+  if (best) nextDir = best;
+}
+document.addEventListener("keydown", e => {
+  if ($("nameEntry").style.display === "block") { // digitando o nome: jogo não reage
+    if (e.key === "Enter") $("btnName").click();
+    return;
+  }
+  if (e.key === "Escape") { showModeSelect(); return; }
+  if ($("modeSelect").style.display === "flex") { // teclas 1-4 escolhem o modo
+    const m = { "1": "classic", "2": "sandbox", "3": "survival", "4": "mission" }[e.key];
+    if (m) selectMode(m);
+    else if (e.key === " ") { e.preventDefault(); selectMode("classic"); }
+    return;
+  }
+  if (e.key === " ") { e.preventDefault(); toggleStart(); return; }
+  if (e.key.toLowerCase() === "m") { toggleMenu(); return; }
+  if (e.key.toLowerCase() === "g") { useReserve(); return; }
+  const want = SCREEN_KEYS[e.key] || SCREEN_KEYS[e.key.toLowerCase()];
+  if (want) { steer(want); e.preventDefault(); }
+});
+$("reserveBox").addEventListener("click", useReserve);
+document.querySelectorAll("#modeSelect .card").forEach(c =>
+  c.addEventListener("click", () => selectMode(c.dataset.mode)));
+$("btnModes").addEventListener("click", showModeSelect);
+$("btnBackModes").addEventListener("click", showModeSelect);
+
+// --- Swipe (celular): deslizar muda a direção, toque rápido inicia/pausa ---
+let touchStart = null;
+renderer.domElement.addEventListener("touchstart", e => {
+  touchStart = [e.touches[0].clientX, e.touches[0].clientY];
+  e.preventDefault();
+}, { passive: false });
+renderer.domElement.addEventListener("touchend", e => {
+  if (!touchStart) return;
+  const dx = e.changedTouches[0].clientX - touchStart[0];
+  const dy = e.changedTouches[0].clientY - touchStart[1];
+  touchStart = null;
+  e.preventDefault();
+  const len = Math.hypot(dx, dy);
+  if (len < 24) { toggleStart(); return; } // tap = espaço
+  steer({ x: dx / len, y: -dy / len });    // NDC tem o eixo Y invertido
+}, { passive: false });
+
+// arrasto do mouse: gira a câmera (modo manual por 3s)
+let dragging = false, lastMX = 0, lastMY = 0;
+renderer.domElement.addEventListener("mousedown", e => { dragging = true; lastMX = e.clientX; lastMY = e.clientY; });
+window.addEventListener("mouseup", () => dragging = false);
+window.addEventListener("mousemove", e => {
+  if (!dragging) return;
+  const dx = e.clientX - lastMX, dy = e.clientY - lastMY;
+  lastMX = e.clientX; lastMY = e.clientY;
+  const right = camUp.clone().cross(camVec).normalize();
+  const qY = new THREE.Quaternion().setFromAxisAngle(camUp, -dx * 0.006);
+  const qX = new THREE.Quaternion().setFromAxisAngle(right, -dy * 0.006);
+  camVec.applyQuaternion(qY).applyQuaternion(qX).normalize();
+  camUp.applyQuaternion(qY).applyQuaternion(qX).normalize();
+  manualUntil = performance.now() + 3000;
+});
+renderer.domElement.addEventListener("wheel", e => {
+  e.preventDefault();
+  camDist = Math.max(N * 1.4, Math.min(N * 4, camDist + e.deltaY * 0.02));
+}, { passive: false });
+
+function toggleStart() {
+  startMusic();
+  if ($("modeSelect").style.display === "flex" || $("missionList").style.display === "flex") {
+    selectMode("classic");
+    return;
+  }
+  if (dead || !snake) { resetGame(); running = true; paused = false; hideOverlay(); SFX.start(); }
+  else if (!running) { running = true; paused = false; hideOverlay(); SFX.start(); }
+  else {
+    paused = !paused;
+    paused ? showOverlay("PAUSA", "#ff0", "Espaço para continuar") : hideOverlay();
+  }
+  $("btnStart").textContent = paused ? "CONTINUAR (Espaço)" : "PAUSA (Espaço)";
+}
+$("btnStart").addEventListener("click", toggleStart);
+
+/* ================= MENU ================= */
+const menu = $("menu");
+function toggleMenu() {
+  const open = menu.style.display !== "flex";
+  menu.style.display = open ? "flex" : "none";
+  if (open) {
+    if (running) { paused = true; showOverlay("PAUSA", "#ff0", "Espaço para continuar"); }
+    fillMenu();
+  }
+}
+function fillMenu() {
+  $("optSpeed").value = cfg.speed; $("optSpeedVal").textContent = cfg.speed;
+  $("optGrid").value = cfg.gridSize; $("optGridVal").textContent = cfg.gridSize;
+  $("optSound").value = String(cfg.soundEnabled);
+  $("optMusic").value = String(cfg.musicEnabled);
+  $("optGhost").value = String(cfg.ghostEnabled);
+  $("optMinimap").value = String(cfg.minimapEnabled);
+  $("optObstacles").value = String(cfg.obstaclesEnabled);
+  $("optObstacleCount").value = cfg.obstacleCount; $("optObstacleCountVal").textContent = cfg.obstacleCount;
+  $("optPowerups").value = String(cfg.powerupsEnabled);
+  $("optPowerupEvery").value = cfg.powerupEvery; $("optPowerupEveryVal").textContent = cfg.powerupEvery + "s";
+  $("optPowerupMax").value = cfg.powerupMax; $("optPowerupMaxVal").textContent = cfg.powerupMax;
+  $("optPortalMax").value = cfg.portalMax; $("optPortalMaxVal").textContent = cfg.portalMax;
+  $("optPortalEvery").value = cfg.portalEvery; $("optPortalEveryVal").textContent = cfg.portalEvery + "s";
+  const gold = $("optSkinGold");
+  gold.disabled = !goldUnlocked();
+  gold.textContent = goldUnlocked() ? "🥇 Dourada" : "🔒 Dourada (complete as 8 missões)";
+  $("optSkin").value = cfg.skin;
+  $("optStartLen").value = cfg.startLength;
+}
+for (const [id, suffix] of [["optSpeed",""],["optGrid",""],["optObstacleCount",""],["optPortalMax",""],["optPortalEvery","s"],["optPowerupEvery","s"],["optPowerupMax",""]])
+  $(id).addEventListener("input", e => $(id + "Val").textContent = e.target.value + suffix);
+
+$("btnSave").addEventListener("click", () => {
+  cfg.speed = +$("optSpeed").value;
+  cfg.gridSize = +$("optGrid").value;
+  cfg.soundEnabled = $("optSound").value === "true";
+  cfg.musicEnabled = $("optMusic").value === "true";
+  cfg.ghostEnabled = $("optGhost").value === "true";
+  cfg.minimapEnabled = $("optMinimap").value === "true";
+  cfg.obstaclesEnabled = $("optObstacles").value === "true";
+  cfg.obstacleCount = +$("optObstacleCount").value;
+  cfg.powerupsEnabled = $("optPowerups").value === "true";
+  cfg.powerupEvery = +$("optPowerupEvery").value;
+  cfg.powerupMax = +$("optPowerupMax").value;
+  cfg.portalMax = +$("optPortalMax").value;
+  cfg.portalEvery = +$("optPortalEvery").value;
+  cfg.skin = $("optSkin").value;
+  if (cfg.skin === "dourada" && !goldUnlocked()) cfg.skin = "bolas"; // trava da dourada
+  cfg.startLength = Math.max(1, +$("optStartLen").value || 3);
+  localStorage.setItem("snakeCube3dConfig", JSON.stringify(cfg));
+  toggleMenu();
+  resetGame(); running = false;
+  showModeSelect();
+});
+$("btnReset").addEventListener("click", () => {
+  localStorage.removeItem("snakeCube3dConfig");
+  cfg = loadConfig();
+  fillMenu();
+  resetGame(); running = false;
+  showModeSelect();
+});
+$("btnClose").addEventListener("click", toggleMenu);
+$("btnMenu").addEventListener("click", toggleMenu);
+
+/* ================= INÍCIO ================= */
+camera.aspect = 1;
+camera.updateProjectionMatrix();
+resetGame();
+showModeSelect(); // a primeira tela é a escolha de modo
+requestAnimationFrame(t => { lastTime = t; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>
