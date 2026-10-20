@@ -641,8 +641,44 @@ function loadConfig() {
     Object.assign(base, s);
     if (sc.snakeBody) base.colors.snakeBody = sc.snakeBody;
   } catch (e) {}
-  return base;
+  return sanitizeCfg(base);
 }
+
+// P3-c: limita cada opção salva às faixas do menu (armazenamento adulterado ou versão antiga)
+function sanitizeCfg(c) {
+  for (const k in CONFIG) { // tipo errado ou número inválido volta ao padrão
+    const d = CONFIG[k];
+    if (typeof d === "number" && !(typeof c[k] === "number" && Number.isFinite(c[k]))) c[k] = d;
+    else if (typeof d === "boolean" && typeof c[k] !== "boolean") c[k] = d;
+    else if (typeof d === "string" && typeof c[k] !== "string") c[k] = d;
+  }
+  const clamp = (k, lo, hi, step) => {
+    let v = Math.min(hi, Math.max(lo, c[k]));
+    v = step ? lo + Math.round((v - lo) / step) * step : Math.round(v);
+    c[k] = v;
+  };
+  clamp("gridSize", 8, 20, 2);
+  clamp("speed", 3, 15);
+  clamp("startLength", 1, 10);
+  c.startLength = Math.min(c.startLength, maxStartLen(c.gridSize));
+  clamp("obstacleCount", 2, 30);
+  clamp("powerupEvery", 2, 20);
+  clamp("powerupMax", 1, 6);
+  clamp("portalMax", 0, 4);
+  clamp("portalEvery", 4, 20);
+  clamp("tiltSens", 8, 30);
+  c.musicLevel = Math.min(1, Math.max(0, c.musicLevel));
+  c.soundVolume = Math.min(1, Math.max(0, c.soundVolume));
+  if (!["neon", "natureza", "misterioso", "acessivel"].includes(c.theme)) c.theme = CONFIG.theme;
+  if (!["bolas", "continua", "voxel", "natural", "antiga", "dourada"].includes(c.skin)) c.skin = CONFIG.skin;
+  if (!["inclinacao", "toque", "deslizar"].includes(c.control)) c.control = CONFIG.control;
+  if (!c.colors || typeof c.colors.snakeBody !== "string" || !/^#[0-9a-f]{6}$/i.test(c.colors.snakeBody)) c.colors = JSON.parse(JSON.stringify(CONFIG.colors));
+  return c;
+}
+// P2-a: a cobra nasce em fila reta a partir do centro da face; maior que isso sai do cubo
+function maxStartLen(grid) { return Math.floor(grid / 2) + 1; }
+// recorde salvo precisa ser número finito (senão "abc" ou "1e999" travam o recorde para sempre)
+function lsNum(k) { const v = Number(LS.get(k)); return Number.isFinite(v) && v > 0 ? v : 0; }
 
 // --- Áudio: barramentos separados (sons e música) + compressor mestre ---
 let audioCtx, sfxBus, musicBus, musicFilter, noiseBuf;
@@ -1220,14 +1256,19 @@ let ghostPath = null, curRec = [], stepsTaken = 0; // 👻 trajeto da run anteri
 // ----- modos de jogo -----
 let mode = "classic", mission = null, pendingOver = null;
 let survivalTime = 0, hunger = 20, fury = null, furyClock = 0;
-let survivalBest = +(LS.get("snakeCube3dSurvivalBest") || 0);
+let survivalBest = lsNum("snakeCube3dSurvivalBest");
 let missionsDone = lsJSON("snakeCube3dMissions", {});
 function newStats() { return { fruits: 0, faces: new Set(), portals: 0, usedReserve: false, leftTurns: 0, straight: 0, time: 0 }; }
 let st = newStats();
 
 // ----- highscores top 3 (Clássico: pontos · Sobrevivência: tempo) -----
 function topKey() { return mode === "classic" ? "snakeCube3dTop_classic" : mode === "survival" ? "snakeCube3dTop_survival" : null; }
-function getTop(k) { try { return JSON.parse(LS.get(k) || "[]"); } catch (e) { return []; } }
+function getTop(k) {
+  try {
+    const t = JSON.parse(LS.get(k) || "[]");
+    return Array.isArray(t) ? t.filter(e => e && Number.isFinite(e.v) && e.v >= 0).map(e => ({ name: String(e.name || "").slice(0, 12), v: e.v })).slice(0, 3) : [];
+  } catch (e) { return []; }
+}
 function qualifies(k, v) { const t = getTop(k); return v > 0 && (t.length < 3 || v > t[t.length - 1].v); }
 function addTop(k, name, v) {
   const t = getTop(k);
@@ -1239,7 +1280,7 @@ function showRank(k, unit) {
   $("ovRank").innerHTML = getTop(k).map((e, i) => `${ico("medal", "m" + (i + 1))} ${e.name} — ${e.v}${unit}`).join("<br>");
 }
 const goldUnlocked = () => MISSIONS.every(m => missionsDone[m.id]);
-let hiscore = +(LS.get("snakeCube3dHiscore") || 0);
+let hiscore = lsNum("snakeCube3dHiscore");
 $("hiscore").textContent = hiscore;
 
 // câmera orbital: segue a cabeça, mas o mouse pode girar
@@ -1251,6 +1292,7 @@ const occupied = () => {
   portals.forEach(o => s.add(key(o.p)));
   powerups.forEach(o => s.add(key(o.p)));
   if (food) s.add(key(food.p));
+  extraFoods.forEach(f => s.add(key(f.p))); // P3-a: frutas extras do festival/sandbox
   return s;
 };
 function freeCell() {
@@ -1633,11 +1675,20 @@ function furyTick(dt) {
     if (fury.moveT >= 0.8) { // as pedras dão um passo
       fury.moveT = 0;
       beep(70, 0.07, "square");
+      // P2-b: pedra não pisa em comida, item, portal, corpo da cobra ou outra pedra (a cabeça continua valendo)
+      const blocked = new Set(snake.slice(1).map(c => key(c.p)));
+      if (food) blocked.add(key(food.p));
+      extraFoods.forEach(f => blocked.add(key(f.p)));
+      powerups.forEach(f => blocked.add(key(f.p)));
+      portals.forEach(f => blocked.add(key(f.p)));
+      obstacles.forEach(f => blocked.add(key(f.p)));
       for (const o of obstacles) {
         const [t1, t2] = tangents(o.n);
         const d = [t1, t1.clone().negate(), t2, t2.clone().negate()][Math.floor(Math.random() * 4)];
         const cand = o.p.clone().add(d);
         if (Math.abs(cand.dot(t1)) > half() - 0.4 || Math.abs(cand.dot(t2)) > half() - 0.4) continue; // não sai da face
+        if (blocked.has(key(cand))) continue; // P2-b
+        blocked.delete(key(o.p)); blocked.add(key(cand));
         o.p.copy(cand);
         o.mesh.position.copy(o.p).addScaledVector(o.n, 0.3);
         burst(o.mesh.position, 0x8a7f70, 3, 2);
@@ -1672,7 +1723,8 @@ function resetGame() {
   // cobra nasce na face +Z andando em +X
   const nz = V3(0, 0, 1);
   snake = [];
-  for (let i = 0; i < cfg.startLength; i++) {
+  const startLen = Math.min(cfg.startLength, maxStartLen(N)); // P2-a: não nasce fora do cubo
+  for (let i = 0; i < startLen; i++) {
     const a = 0.5 - i; // cabeça à frente
     snake.push({ p: V3(a - 0.0, 0.5, 0).setZ(half()).setX(a).setY(0.5), n: nz.clone() });
   }
@@ -2376,7 +2428,7 @@ $("btnSave").addEventListener("click", () => {
   cfg.portalEvery = +$("optPortalEvery").value;
   cfg.skin = $("optSkin").value;
   if (cfg.skin === "dourada" && !goldUnlocked()) cfg.skin = "bolas"; // trava da dourada
-  cfg.startLength = Math.max(1, +$("optStartLen").value || 3);
+  cfg.startLength = Math.min(maxStartLen(cfg.gridSize), Math.max(1, Math.min(10, Math.round(+$("optStartLen").value) || 3)));
   LS.set("snakeCube3dConfig", JSON.stringify(cfg));
   toggleMenu();
   resetGame(); running = false;
