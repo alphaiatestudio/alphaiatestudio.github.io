@@ -31,6 +31,25 @@
   a.game:hover { border-color: #e3ae52; box-shadow: 0 0 20px rgba(227,174,82,.35); transform: translateY(-2px); }
   a.game h2 { font-size: 18px; margin-bottom: 6px; }
   a.game p { font-size: 13px; color: #9ab; line-height: 1.5; }
+  form.navio {
+    width: 100%; max-width: 560px; padding: 20px 24px; border-radius: 12px;
+    border: 1px dashed rgba(122,184,255,.5); background: rgba(122,184,255,.05);
+    display: grid; gap: 10px;
+  }
+  form.navio label { font-size: 13px; letter-spacing: 4px; color: #7ab8ff; font-weight: bold; }
+  form.navio .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  form.navio input {
+    flex: 1 1 200px; min-width: 0; padding: 12px 14px; border-radius: 8px; font: inherit; font-size: 16px;
+    background: #06161f; color: #eaf2f3; border: 1px solid rgba(190,224,233,.25);
+  }
+  form.navio button {
+    padding: 12px 18px; border-radius: 8px; border: 0; cursor: pointer; font: inherit; font-weight: bold;
+    background: #e3ae52; color: #2a1c05;
+  }
+  form.navio button:disabled { opacity: .6; cursor: wait; }
+  form.navio input:focus-visible, form.navio button:focus-visible, a.game:focus-visible { outline: 2px solid #e3ae52; outline-offset: 2px; }
+  #msg { font-size: 13px; color: #9ab; min-height: 1.4em; }
+  #msg.erro { color: #ff8a7a; }
   footer { font-size: 12px; color: #667; text-align: center; }
   footer a { color: #6ad; }
   @media (prefers-reduced-motion: reduce) { h1 { animation: none; } }
@@ -44,27 +63,41 @@
     <h2>🧊 Snake Cubo 3D</h2>
     <p>A cobrinha anda na superfície de um cubo. Portais, missões, modos de jogo, skins e highscores.</p>
   </a>
-  <a class="game" href="snake-cubo-3d-mobile-cdn.html">
-    <h2>📱 Snake Cubo 3D · Mobile</h2>
-    <p>A versão do cubo pensada para tela de celular.</p>
-  </a>
-  <a class="game" href="snake-neon.html">
-    <h2>🐍 Snake Neon 2D</h2>
-    <p>A versão clássica em cartoon: frutas variadas, power-ups e obstáculos.</p>
-  </a>
   <a class="game" href="tetris-neon-3d.html">
     <h2>🟦 Tetris Neon 3D</h2>
     <p>Peças em 3D com brilho neon.</p>
   </a>
-  <a class="game" href="snake-cubo-3d-offline.html">
-    <h2>📦 Snake Cubo 3D (offline)</h2>
-    <p>O jogo 3D com a biblioteca embutida: baixe o arquivo e jogue sem internet.</p>
-  </a>
-  <a class="game" href="snake-cubo-3d-mobile-offline.html">
-    <h2>📦 Snake Cubo 3D · Mobile (offline)</h2>
-    <p>A versão de celular com tudo embutido, para jogar sem internet.</p>
-  </a>
 </div>
+<form class="navio" id="navio" autocomplete="off">
+  <label for="senha">SENHA DO NAVIO</label>
+  <div class="row">
+    <input id="senha" type="password" placeholder="Digite a senha para embarcar" required>
+    <button id="embarcar" type="submit">Embarcar</button>
+  </div>
+  <p id="msg" aria-live="polite">Abre a demonstração do Alpha-IAte, o iate da tripulação do estúdio.</p>
+</form>
 <footer>HTML puro + Three.js · <a href="https://github.com/alphaiatestudio">github.com/alphaiatestudio</a></footer>
+<script>
+// O iate fica cifrado em navio.json (AES-GCM, chave derivada da senha por PBKDF2).
+// Sem a senha certa o conteúdo não decifra.
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+document.getElementById('navio').addEventListener('submit', async e => {
+  e.preventDefault();
+  const msg = document.getElementById('msg'), btn = document.getElementById('embarcar');
+  btn.disabled = true; msg.className = ''; msg.textContent = 'Conferindo a senha…';
+  try {
+    const pacote = await (await fetch('navio.json', {cache: 'no-store'})).json();
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(document.getElementById('senha').value), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({name: 'PBKDF2', salt: b64(pacote.salt), iterations: pacote.iter, hash: 'SHA-256'}, base, {name: 'AES-GCM', length: 256}, false, ['decrypt']);
+    let html;
+    try { html = new TextDecoder().decode(await crypto.subtle.decrypt({name: 'AES-GCM', iv: b64(pacote.iv)}, key, b64(pacote.ct))); }
+    catch (err) { msg.className = 'erro'; msg.textContent = 'Senha incorreta. Confira com o comandante e tente de novo.'; btn.disabled = false; return; }
+    msg.textContent = 'Embarcando…';
+    document.open(); document.write(html); document.close();
+  } catch (err) {
+    msg.className = 'erro'; msg.textContent = 'Não deu para carregar o navio. Verifique a conexão e tente de novo.'; btn.disabled = false;
+  }
+});
+</script>
 </body>
 </html>

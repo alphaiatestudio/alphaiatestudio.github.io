@@ -1,17 +1,8 @@
 # 🐍 Snake Neon — Documentação simplificada
 
-Três jogos, três arquivos. Todos abrem com **duplo clique** no navegador, sem instalar nada.
+Neste site fica só a versão mais recente e enxuta: `snake-cubo-3d-cdn.html`, o jogo 3D no cubo, que baixa o Three.js da internet na primeira vez. Abre com **duplo clique** no navegador, sem instalar nada.
 
-| Arquivo | O que é | Internet? |
-|---|---|---|
-| `snake-neon.html` | Jogo 2D cartoon (canvas) | Não precisa |
-| `snake-cubo-3d-cdn.html` | Jogo 3D no cubo (Three.js via CDN) | Só na 1ª vez |
-| `snake-cubo-3d-offline.html` | Mesmo jogo 3D, com a biblioteca embutida | Nunca |
-
-> As duas versões 3D são **idênticas em jogabilidade**. A offline é ~700 KB porque carrega
-> o Three.js dentro dela; a CDN tem ~36 KB mas baixa a biblioteca da internet.
-> Para editar o jogo, prefira a versão **CDN** (o código fica fácil de ler) — depois é só
-> repetir a troca da tag `<script src=...>` pelo conteúdo da biblioteca para gerar a offline.
+> As versões 2D, mobile e offline não são publicadas aqui. Partes deste guia ainda as citam.
 
 ---
 
