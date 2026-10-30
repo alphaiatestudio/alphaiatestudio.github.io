@@ -371,6 +371,37 @@ details.nums > div { display: flex; flex-direction: column; gap: 8px; padding-to
 .splash-art h1 { text-shadow: 0 0 18px color-mix(in srgb, var(--amber) 55%, transparent), 0 2px 12px rgba(0,0,0,.8); }
 .splash-art .sub { font-family: var(--f-display); }
 .new-tag { font-family: var(--f-data); font-size: .66rem; letter-spacing: .1em; padding: 1px 6px; background: var(--he); color: #001318; border-radius: 3px; vertical-align: 2px; }
+/* ===== v1.2 ===== */
+/* balões flutuantes sobre o mapa: dica da Mei e aviso de voltar à base */
+.bubble { position: absolute; z-index: 6; left: 50%; transform: translateX(-50%); top: 10px; width: min(92%, 460px); box-shadow: 0 8px 28px rgba(0,0,0,.65); animation: bubbleIn .28s cubic-bezier(.2,1.4,.4,1); }
+.mei.bubble { pointer-events: none; background: rgba(26,22,15,.9); border-color: #8a6a2e; padding: 8px 34px 8px 10px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.mei.bubble p { font-size: .92rem; }
+.mei.bubble::after, .bubble-alert::after { content: ''; position: absolute; left: 22px; bottom: -8px; border: 8px solid transparent; border-bottom: 0; border-top-color: #8a6a2e; }
+.bubble-x { pointer-events: auto; position: absolute; top: 2px; right: 2px; width: 32px; height: 32px; background: none; border: 0; color: var(--muted); font-size: 1.3rem; cursor: pointer; line-height: 1; }
+.bubble-alert { top: auto; bottom: 14px; background: rgba(42,18,12,.95); border: 2px solid var(--alert); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.bubble-alert::after { top: -8px; bottom: auto; border-top: 0; border-bottom: 8px solid var(--alert); border-top-color: transparent; }
+.mei-chip { position: absolute; z-index: 5; top: 8px; left: 8px; min-height: 30px; padding: 2px 10px; border-radius: 999px; border: 1px solid #8a6a2e; background: rgba(26,22,15,.9); color: var(--amber); font-family: var(--f-data); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+@keyframes bubbleIn { from { opacity: 0; transform: translate(-50%, -8px) scale(.94); } }
+/* barra de ferramentas acima do painel */
+.toolbar { position: sticky; top: 0; z-index: 3; background: var(--void); padding-bottom: 2px; flex-wrap: nowrap; }
+.toolbar .btn { min-height: 52px; }
+.tool[aria-pressed="true"] { border-color: var(--he); box-shadow: inset 0 0 0 2px var(--he), 0 0 16px color-mix(in srgb, var(--he) 45%, transparent); }
+.tool.primary[aria-pressed="true"] { box-shadow: inset 0 0 0 2px #fff6, 0 0 18px color-mix(in srgb, var(--amber) 60%, transparent); }
+.toolhint { font-size: .85rem; color: var(--he); text-align: center; }
+/* seleção de sócio: balão "Vamos nessa?" fixo embaixo, sem precisar rolar */
+.go-balloon { position: fixed; z-index: 15; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); width: min(calc(100% - 24px), 520px); display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(16,20,28,.97); border: 2px solid var(--amber); border-radius: 16px; box-shadow: 0 10px 34px rgba(0,0,0,.7), 0 0 24px color-mix(in srgb, var(--amber) 30%, transparent); animation: balloonUp .3s cubic-bezier(.2,1.4,.4,1); }
+.go-balloon .face { width: 54px; height: 54px; flex: none; border-radius: 50%; background: var(--panel-2) center 20% / cover no-repeat; border: 2px solid var(--amber); }
+.go-balloon .say { flex: 1; min-width: 0; }
+.go-balloon .say b { display: block; font-family: var(--f-display); font-size: 1.25rem; text-transform: uppercase; color: var(--amber); }
+.go-balloon .say span { display: block; font-size: .85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.go-balloon .btn { flex: none; }
+@keyframes balloonUp { from { opacity: 0; transform: translate(-50%, 20px); } }
+#s-char .wrap { padding-bottom: 110px; }
+.name-row { display: flex; gap: 8px; }
+.name-row .txt-in { flex: 1; }
+.dice { flex: none; width: 52px; min-height: 48px; font-size: 1.6rem; padding: 0; }
+.dice.roll { animation: roll .45s ease-out; }
+@keyframes roll { to { transform: rotate(360deg); } }
 /* paletas daltônicas para os níveis (o mapa usa RAMPS no JS) */
 body.cb-protan, body.cb-deutan { --o2-high: #5aa9ff; --o2-mid: #f2d24b; --o2-low: #e26ad8; --alert: #ff8f3d; --ok: #5aa9ff; }
 body.cb-tritan { --he: #ff7ab8; --he-high: #ff9ccc; --he-mid: #c86890; --he-low: #6a5058; }
@@ -461,7 +492,7 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
       <div class="card">
         <div class="eyebrow">Ajustes</div>
         <label class="toggle"><input type="checkbox" id="opt-sound" checked> Som</label>
-        <div class="lc-row"><label for="opt-gfx">Gráficos</label><select id="opt-gfx" class="txt-in" style="width:auto;min-height:44px;font-size:1rem"><option value="alto">Alto (3D + brilho)</option><option value="leve">Leve (3D sem brilho)</option><option value="off">Econômico (2D)</option></select></div>
+        <div class="lc-row"><label for="opt-gfx">Gráficos</label><select id="opt-gfx" class="txt-in" style="width:auto;min-height:44px;font-size:1rem"><option value="alto">Qualidade (3D + brilho)</option><option value="leve">Desempenho (3D leve)</option><option value="off">Econômico (2D)</option></select></div>
         <button class="btn" id="b-lowcode" style="align-self:flex-start">Low Code</button>
         <button class="btn" id="b-reset" style="align-self:flex-start">Recomeçar campanha</button>
         <div id="reset-confirm" class="row" hidden>
@@ -470,7 +501,7 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
           <button class="btn primary" id="b-reset-yes">Apagar e recomeçar</button>
         </div>
       </div>
-      <p class="muted" style="font-size:.8rem">v1.0 · Alpha-IAte Studio · versão de lançamento para amigos. Seu progresso fica salvo neste aparelho.</p>
+      <p class="muted" style="font-size:.8rem">v1.2 · Alpha-IAte Studio · versão de lançamento para amigos. Seu progresso fica salvo neste aparelho.</p>
     </div>
   </section>
 
@@ -512,6 +543,11 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
         <button class="btn" id="b-char-back">Voltar</button>
         <button class="btn primary" id="b-char-go" disabled>Confirmar</button>
       </div>
+      <div class="go-balloon" id="char-balloon" hidden>
+        <span class="face" id="char-balloon-face" aria-hidden="true"></span>
+        <span class="say"><b id="char-balloon-txt">Vamos nessa?</b><span id="char-balloon-sub"></span></span>
+        <button class="btn primary" id="b-char-go2">Fechar parceria</button>
+      </div>
     </div>
   </section>
 
@@ -522,7 +558,7 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
       <h2>Sua identidade</h2>
       <div class="card">
         <label for="player-name">Como você quer ser chamado(a)?</label>
-        <input type="text" id="player-name" class="txt-in" maxlength="20" placeholder="Comandante" autocomplete="nickname">
+        <div class="name-row"><input type="text" id="player-name" class="txt-in" maxlength="20" placeholder="Comandante" autocomplete="nickname"><button class="btn dice" id="b-dice" type="button" aria-label="Sortear um nome" title="Sortear um nome">🎲</button></div>
       </div>
       <div class="card">
         <div class="eyebrow">Insígnia</div>
@@ -641,7 +677,12 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
         <div class="reg"><button class="badge-btn" id="h-me" title="Seu crachá: toque para ver"></button><br><span class="badge" id="h-badge" hidden></span> <span id="h-reg"></span><br><span id="h-he" class="he"></span></div>
       </div>
       <div class="mapwrap">
-        <div class="mapbox" id="mapbox"><div class="o2-frame" id="o2-frame"><canvas id="map3d" aria-hidden="true"></canvas><canvas id="map" tabindex="0" aria-label="Mapa da região de prospecção, grade de 12 por 12. Use as setas para mover a seleção e Enter para perfurar. A borda mostra o oxigênio restante."></canvas></div></div>
+        <div class="mapbox" id="mapbox"><div class="o2-frame" id="o2-frame"><canvas id="map3d" aria-hidden="true"></canvas><canvas id="map" tabindex="0" aria-label="Mapa da região de prospecção, grade de 12 por 12. Use as setas para mover a seleção e Enter para perfurar. A borda mostra o oxigênio restante."></canvas></div>
+          <!-- v1.2: dicas da Mei e avisos flutuam sobre o mapa, sem ocupar o painel -->
+          <div class="mei bubble" id="mei" role="status" aria-live="polite" hidden><img class="tutorial-img" id="tutorial-img" alt="" hidden><span class="who">Mei</span><p id="mei-txt"></p><button class="bubble-x" id="mei-x" aria-label="Fechar dica">×</button></div>
+          <div class="bubble bubble-alert" id="base-bubble" role="alert" hidden></div>
+          <button class="mei-chip" id="mei-chip" aria-label="Mostrar dica da Mei" title="Dica da Mei" hidden>Mei</button>
+        </div>
         <div class="legend" id="legend" aria-hidden="true"></div>
         <div class="maptools">
           <div class="seg" role="group" aria-label="Camada do mapa">
@@ -654,7 +695,12 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
         </div>
       </div>
       <div class="panel" id="panel">
-        <div class="mei" id="mei"><img class="tutorial-img" id="tutorial-img" alt="" hidden><span class="who">Mei</span><p id="mei-txt"></p></div>
+        <!-- v1.2: ferramentas ACIMA do painel. Toque numa ferramenta e depois nas células do mapa (o cursor vira a ferramenta) -->
+        <div class="row toolbar" id="toolbar" role="toolbar" aria-label="Ferramentas">
+          <button class="btn stack tool" id="a-sample" data-tool="sample"><span><svg class="icon"><use href="#i-core"/></svg> Amostra</span><span class="cost" id="c-sample"></span></button>
+          <button class="btn stack tool" id="a-radar" data-tool="radar"><span><svg class="icon"><use href="#i-radar"/></svg> Radar</span><span class="cost" id="c-radar"></span></button>
+          <button class="btn stack tool primary" id="a-drill" data-tool="drill"><span><svg class="icon"><use href="#i-drill"/></svg> Perfurar</span><span class="cost" id="c-drill"></span></button>
+        </div>
         <div id="maintbox"></div>
         <div id="cellcard"></div>
       </div>
@@ -1749,8 +1795,9 @@ const CFG_DEFAULTS = {
   rockEnabled: true, hardInterval: 8, hardMult: 1.3, rescueBase: 60,
   // v0.8 · quebra da broca (D2): chance por furo conforme o que se sabe da célula; com amostra, zero
   brkNoData: 0.08, brkSat: 0.04, maintSec: 20, adSec: 5,
-  // v1.0 · satélite expandido (item 21): depois da varredura completa, ele volta a cada orbitSec para uma varredura focada 3×3
-  focusCost: 25, orbitSec: 40,
+  // v1.2 · satélite por passagens: 1ª passagem orbitalCost, as seguintes passCost, até maxPasses, uma por janela orbital
+  passCost: 20, orbitSec: 20, maxPasses: 5,
+  experimental: false, // v1.2 · Low Code: mostra os sócios experimentais (sem arte) na escolha
   // v1.0 · posto avançado (item 5 + D-MAR2-1): 15 cr/h, acumula no máximo 24 h · bônus da Selene (D-MAR2-2): 2 por dia
   baseRate: 15, baseCapH: 24, hubAdCr: 150, hubAdPerDay: 2,
   cVoid: '#07090d', cAmber: '#ffb347', cHe: '#52d9ea', cO2: '#86e8b8', cAlert: '#ff6f5e', fontSize: 16, circuit: true,
@@ -1774,7 +1821,7 @@ const MTM = (() => {
     tempest: { id: 'tempest', nome: 'Oceano das Tempestades', sub: 'Manchas ricas e estreitas, muitas crateras novas e rocha', risco: 'Alto', blobs: [2, 4], amp: 1.4, spread: [0.8, 1.5], craters: [2, 4], rock: 0.07, unlock: 2 },
   };
 
-  const COST = { orbital: { cr: CFG.orbitalCost, o2: 0 }, focus: { cr: CFG.focusCost, o2: 0 }, radar: { cr: CFG.radarCost, o2: 2 }, sample: { cr: CFG.sampleCost, o2: 2 }, drill: { cr: CFG.drillCost } };
+  const COST = { orbital: { cr: CFG.orbitalCost, o2: 0 }, radar: { cr: CFG.radarCost, o2: 2 }, sample: { cr: CFG.sampleCost, o2: 2 }, drill: { cr: CFG.drillCost } };
   // teor de corte: abaixo dele não paga o processamento
   const K = { heCr: 1.6, heCut: 8, o2U: 4, o2Cut: 1 };
   const heVal = (he, T, m) => Math.max(0, he - K.heCut) * T * K.heCr * m;
@@ -1795,7 +1842,6 @@ const MTM = (() => {
   const breakP = (camp, k) => (k.smp ? 0 : k.orb ? CFG.brkSat : CFG.brkNoData) * (camp.char === 'minerador' ? 0.5 : 1) * novice(camp);
   // satélite expandido: o Argo-7 recalibra a órbita, e o satélite volta 30% mais rápido com ele
   const orbitSec = camp => Math.round(CFG.orbitSec * (camp.char === 'argo' ? 0.7 : 1));
-  const focusCr = camp => COST.focus.cr;
   const techCost = (camp, key) => { const c = TECH[key].cost[camp.tech[key]]; return camp.char === 'empresario' ? Math.ceil(c * 1.2) : c; };
 
   const CHARS = {
@@ -1916,8 +1962,8 @@ const MTM = (() => {
       known: site.cells.map(() => ({})), orbital: false, over: false, evac: false,
       hardMode: !!opts.hard, insurance, insuranceCost: insurance ? CFG.insuranceCost : 0, maint, prompted2k: false, pilot: camp.char === 'piloto', relocated: false,
       drillMaint: 0, argoRadarUsed: false, // segundos restantes de manutenção da broca
-      satCool: 0, // segundos até o satélite voltar a passar sobre a área (varredura focada)
-      stats: { bonus: 0, radar: 0, samples: 0, wells: 0, dry: 0, jackpots: 0, spent, he: 0, o2got: 0, startCr, breaks: 0, ads: 0, focus: 0 },
+      satCool: 0, satPasses: 0, // segundos até a próxima janela orbital · passagens já feitas
+      stats: { bonus: 0, radar: 0, samples: 0, wells: 0, dry: 0, jackpots: 0, spent, he: 0, o2got: 0, startCr, breaks: 0, ads: 0, passes: 0 },
     };
   }
   // modo difícil: o O₂ drena com o tempo; se zerar, a equipe é resgatada
@@ -1935,12 +1981,10 @@ const MTM = (() => {
 
   function can(camp, ex, act, i) {
     if (ex.over) return 'Expedição encerrada';
-    if (act === 'orbital') { if (ex.orbital) return 'Satélite já usado nesta expedição'; if (camp.credits < COST.orbital.cr) return 'Créditos insuficientes'; return ''; }
-    if (act === 'focus') {
-      if (!ex.orbital) return 'Faça a varredura completa primeiro';
+    if (act === 'orbital') {
+      if ((ex.satPasses || 0) >= CFG.maxPasses) return 'O satélite já fez todas as passagens desta expedição';
       if (ex.satCool > 0) return `Satélite fora de alcance: volta em ${Math.ceil(ex.satCool)} s`;
-      if (!(i >= 0)) return 'Escolha uma célula para o foco';
-      if (camp.credits < focusCr(camp)) return 'Créditos insuficientes';
+      if (camp.credits < passCost(camp, ex)) return 'Créditos insuficientes';
       return '';
     }
     const k = ex.known[i];
@@ -1964,35 +2008,30 @@ const MTM = (() => {
     return { ok: true };
   }
 
+  // v1.2 · satélite por passagens: a 1ª passagem lê blocos grandes e com muito erro (pouca informação);
+  // cada passagem seguinte, na próxima janela orbital, lê blocos menores e a média vai ficando confiável.
+  const PASS_BLOCKS = [6, 4, 3, 2, 1];
+  const passBlock = (camp, n) => PASS_BLOCKS[Math.min(PASS_BLOCKS.length - 1, n + camp.tech.orbital)]; // P&D do satélite pula as passagens grossas
+  const passCost = (camp, ex) => ex.satPasses ? CFG.passCost : COST.orbital.cr;
   function doOrbital(camp, ex) {
     const e = can(camp, ex, 'orbital'); if (e) return { err: e };
-    camp.credits -= COST.orbital.cr; ex.stats.spent += COST.orbital.cr; ex.orbital = true;
-    const L = camp.tech.orbital, B = TECH.orbital.block[L], nz = TECH.orbital.noise[L] * (camp.char === 'minerador' ? 1.5 : camp.char === 'argo' ? 0.7 : 1), r = xr(ex);
-    const unc = nz + 0.10 * (B - 1);
+    const cost = passCost(camp, ex);
+    camp.credits -= cost; ex.stats.spent += cost; ex.orbital = true;
+    const n = ex.satPasses || 0, L = camp.tech.orbital, B = passBlock(camp, n);
+    const nz = TECH.orbital.noise[L] * (camp.char === 'minerador' ? 1.5 : camp.char === 'argo' ? 0.7 : 1), r = xr(ex), w = 1 / (B * B);
     for (let by = 0; by < N; by += B) for (let bx = 0; bx < N; bx += B) {
-      let sh = 0, so = 0, n = 0;
-      for (let y = by; y < Math.min(N, by + B); y++) for (let x = bx; x < Math.min(N, bx + B); x++) { const c = ex.site.cells[idx(x, y)]; sh += 4 + 46 * c.ti; so += 1 + 4 * c.ti; n++; }
-      const eh = clamp(sh / n * (1 + nz * gauss(r)), 3, 60), eo = clamp(so / n * (1 + nz * gauss(r)), 0.5, 7);
-      for (let y = by; y < Math.min(N, by + B); y++) for (let x = bx; x < Math.min(N, bx + B); x++) ex.known[idx(x, y)].orb = { he: eh, o2: eo, unc, lv: L };
+      let sh = 0, so = 0, c0 = 0;
+      for (let y = by; y < Math.min(N, by + B); y++) for (let x = bx; x < Math.min(N, bx + B); x++) { const c = ex.site.cells[idx(x, y)]; sh += 4 + 46 * c.ti; so += 1 + 4 * c.ti; c0++; }
+      const eh = clamp(sh / c0 * (1 + nz * gauss(r)), 3, 60), eo = clamp(so / c0 * (1 + nz * gauss(r)), 0.5, 7);
+      for (let y = by; y < Math.min(N, by + B); y++) for (let x = bx; x < Math.min(N, bx + B); x++) {
+        const k = ex.known[idx(x, y)], o = k.orb, W = o ? o.w : 0, b = o ? Math.min(o.b, B) : B, cnt = (o ? o.n : 0) + 1;
+        k.orb = { he: o ? (o.he * W + eh * w) / (W + w) : eh, o2: o ? (o.o2 * W + eo * w) / (W + w) : eo, w: W + w, n: cnt, b, lv: L, fine: b === 1,
+          unc: nz / Math.sqrt(cnt) + 0.10 * (b - 1) };
+      }
     }
-    ex.satCool = orbitSec(camp);
-    return { ok: true };
-  }
-
-  // varredura focada (item 21): na janela orbital, lê célula a célula um quadrado 3×3, com menos ruído
-  function doFocus(camp, ex, i) {
-    const e = can(camp, ex, 'focus', i); if (e) return { err: e };
-    const fc = focusCr(camp);
-    camp.credits -= fc; ex.stats.spent += fc; ex.stats.focus = (ex.stats.focus || 0) + 1;
-    const L = camp.tech.orbital, nz = TECH.orbital.noise[L] * 0.6 * (camp.char === 'minerador' ? 1.5 : camp.char === 'argo' ? 0.7 : 1), r = xr(ex);
-    const x0 = i % N, y0 = (i / N) | 0, cells = [];
-    for (let y = Math.max(0, y0 - 1); y <= Math.min(N - 1, y0 + 1); y++) for (let x = Math.max(0, x0 - 1); x <= Math.min(N - 1, x0 + 1); x++) {
-      const j = idx(x, y), c = ex.site.cells[j];
-      ex.known[j].orb = { he: clamp((4 + 46 * c.ti) * (1 + nz * gauss(r)), 3, 60), o2: clamp((1 + 4 * c.ti) * (1 + nz * gauss(r)), 0.5, 7), unc: nz, lv: L, fine: true };
-      cells.push(j);
-    }
-    ex.satCool = orbitSec(camp);
-    return { ok: true, cells };
+    ex.satPasses = n + 1; ex.stats.passes = ex.satPasses;
+    ex.satCool = ex.satPasses < CFG.maxPasses ? orbitSec(camp) : 0;
+    return { ok: true, pass: ex.satPasses, block: B };
   }
   function tickOrbit(ex, sec) { if (ex.satCool > 0) ex.satCool = Math.max(0, ex.satCool - sec); return ex.satCool; }
 
@@ -2051,7 +2090,9 @@ const MTM = (() => {
     const o2Lo = o2 * (1 - o2U), o2Hi = o2 * (1 + o2U);
     const Tmid = (Tlo + Thi) / 2;
     // item 22: confiança pelo que se sabe da célula (amostra vale mais que satélite; radar soma; cratera nova tira)
-    const score = (k.smp ? 2 : k.orb ? (k.orb.fine ? 1.5 : 1) : 0) + (k.radar ? 1 : 0) - (!k.smp && fresh > .35 ? .5 : 0);
+    // satélite: 1 passagem quase não pesa; várias passagens (ou leitura célula a célula) pesam como meia amostra
+    const orbScore = k.orb ? (k.orb.fine || k.orb.n >= 4 ? 1.75 : k.orb.n >= 2 ? 1.25 : 0.75) : 0;
+    const score = (k.smp ? 2 : orbScore) + (k.radar ? 1 : 0) - (!k.smp && fresh > .35 ? .5 : 0);
     const conf = score >= 3 ? 'alto' : score >= 2 ? 'medio' : 'baixo';
     const heMidV = heVal(he, Tmid, m) * (1 - pFail), o2MidV = o2Val(o2, Tmid, m) * (1 - pFail);
     const o2Need = (drillO2(Tlo) + drillO2(Thi)) / 2 + travelO2(camp, ex, i);
@@ -2162,7 +2203,7 @@ const MTM = (() => {
     if (ex.hardMode && profit > 0) camp.hardProfitable = (camp.hardProfitable || 0) + 1;
     ex.result = { ...p, profit, evac: !!evac };
     checkChallenges(camp, ex);
-    camp.log.push({ exp: camp.exp, reg: ex.regId, contract: ex.contract, orbital: ex.orbital, radar: ex.stats.radar, samples: ex.stats.samples, wells: ex.stats.wells, dry: ex.stats.dry, jackpots: ex.stats.jackpots, focus: ex.stats.focus || 0, he: ex.stats.he, o2got: ex.stats.o2got, breaks: ex.stats.breaks || 0, ads: ex.stats.ads || 0, o2left: Math.max(0, Math.round(ex.o2)), payout: p.total, profit, evac: !!evac, hard: !!ex.hardMode, insurance: !!ex.insurance, char: camp.char || null, credits: camp.credits, t: Date.now() });
+    camp.log.push({ exp: camp.exp, reg: ex.regId, contract: ex.contract, orbital: ex.orbital, radar: ex.stats.radar, samples: ex.stats.samples, wells: ex.stats.wells, dry: ex.stats.dry, jackpots: ex.stats.jackpots, passes: ex.satPasses || 0, he: ex.stats.he, o2got: ex.stats.o2got, breaks: ex.stats.breaks || 0, ads: ex.stats.ads || 0, o2left: Math.max(0, Math.round(ex.o2)), payout: p.total, profit, evac: !!evac, hard: !!ex.hardMode, insurance: !!ex.insurance, char: camp.char || null, credits: camp.credits, t: Date.now() });
     if (camp.log.length > 200) camp.log.shift();
     if (!camp.won && camp.credits >= camp.goal) { camp.won = true; ex.result.won = true; }
     return ex.result;
@@ -2175,7 +2216,7 @@ const MTM = (() => {
     camp.credits -= c; camp.tech[key]++; return { ok: true };
   }
 
-  return { heVal, o2Val, N, REGIONS, COST, TECH, CONTRACTS, K, get MIN_FUND() { return CFG.minFund; }, CHARS, CHALLENGES, mulberry32, genSite, newCampaign, applyChar, contractOffer, newExpedition, drainO2, can, doOrbital, doFocus, tickOrbit, orbitSec, focusCr, doRadar, doSample, doDrill, doRelocate, travelO2, dist, estimate, endExpedition, checkChallenges, payout, buyTech, techCost, sampleO2, radarO2, sampleCr, radarCr, breakP, tickMaint, skipMaint, noviceEligible, acceptNovice, ROBO_MAINT, drillO2, idx };
+  return { heVal, o2Val, N, REGIONS, COST, TECH, CONTRACTS, K, get MIN_FUND() { return CFG.minFund; }, CHARS, CHALLENGES, mulberry32, genSite, newCampaign, applyChar, contractOffer, newExpedition, drainO2, can, doOrbital, tickOrbit, orbitSec, passCost, passBlock, doRadar, doSample, doDrill, doRelocate, travelO2, dist, estimate, endExpedition, checkChallenges, payout, buyTech, techCost, sampleO2, radarO2, sampleCr, radarCr, breakP, tickMaint, skipMaint, noviceEligible, acceptNovice, ROBO_MAINT, drillO2, idx };
 })();
 
 
@@ -2389,22 +2430,31 @@ const GFX = (() => {
     if (map.comp) { map.comp.setPixelRatio(Math.min(1.5, map.dpr)); map.comp.setSize(css, css); } // bloom em resolução menor: metade do custo, quase igual na tela
     kick();
   }
-  function renderNow() { if (!ok || !map.size) return; if (map.comp) map.comp.render(); else map.r.render(map.scene, map.cam); }
+  const stats = { renders: 0, frames: 0 }; // medidor ?fps e autoteste ?selftest
+  function renderNow() { if (!ok || !map.size) return; stats.renders++; if (map.comp) map.comp.render(); else map.r.render(map.scene, map.cam); }
+  // v1.1 · CORREÇÃO DO TRAVAMENTO: na v1.0, a poeira chamava kick() DENTRO do quadro, quando raf já estava zerado.
+  // O quadro agendava um novo frame ali e outro no fim: 2 por quadro, que viravam 4, 8, 16… até a página congelar.
+  // Agora existe um único agendamento: durante o quadro, kick() não agenda nada; o fim do quadro decide.
+  let inFrame = false;
   function frame(now) {
     raf = 0; if (!ok || !map.visible) return;
-    const busy = P.n > 0 || dustT > 0 || now < scanUntil;
-    // ocioso (só o pulso das luzes): ~15 fps para poupar bateria
-    if (!busy && last && now - last < 66) { raf = requestAnimationFrame(frame); return; }
-    const dt = Math.min(.05, (now - (last || now)) / 1000); last = now;
-    const parts = stepParticles(dt);
-    if (!parts) P.n = 0;
-    pulse += dt;
-    for (const m of map.marks.children) if (m.userData.pulse) m.scale.setScalar((m.userData.pulse === 'jack' ? 1.3 : 1) * (1 + .12 * Math.sin(pulse * (m.userData.pulse === 'jack' ? 6 : 3))));
-    renderNow();
-    const idle = quality === 'alto' && !calm; // brilho pulsando (módulo e jackpots) só no modo Alto
-    if (parts || now < scanUntil || idle) raf = requestAnimationFrame(frame); else last = 0;
+    inFrame = true;
+    try {
+      const busy = P.n > 0 || dustT > 0 || now < scanUntil;
+      // ocioso (só o pulso das luzes): ~15 fps para poupar bateria
+      if (!busy && last && now - last < 66) { raf = requestAnimationFrame(frame); return; }
+      stats.frames++;
+      const dt = Math.min(.05, (now - (last || now)) / 1000); last = now;
+      const parts = stepParticles(dt);
+      if (!parts) P.n = 0;
+      pulse += dt;
+      for (const m of map.marks.children) if (m.userData.pulse) m.scale.setScalar((m.userData.pulse === 'jack' ? 1.3 : 1) * (1 + .12 * Math.sin(pulse * (m.userData.pulse === 'jack' ? 6 : 3))));
+      renderNow();
+      const idle = quality === 'alto' && !calm; // brilho pulsando (módulo e jackpots) só no modo Qualidade
+      if (parts || now < scanUntil || idle) raf = requestAnimationFrame(frame); else last = 0;
+    } finally { inFrame = false; }
   }
-  function kick() { if (ok && map.visible && !raf) raf = requestAnimationFrame(frame); }
+  function kick() { if (ok && map.visible && !raf && !inFrame) raf = requestAnimationFrame(frame); }
   function setVisible(v) { map.visible = !!v; if (v) kick(); }
   function hold(ms) { scanUntil = performance.now() + ms; kick(); }
 
@@ -2457,7 +2507,7 @@ const GFX = (() => {
   }
   return {
     init, setSite, setData, setMarks, resize, dust, burst, hold, setVisible,
-    get ok() { return ok; }, get hasGL() { return hasGL; },
+    get ok() { return ok; }, get hasGL() { return hasGL; }, get stats() { return stats; }, get quality() { return quality; },
     setCalm(v) { calm = !!v; if (!calm) { skyKick(true); kick(); } },
     // QA (Otávio/Kenji): mede o custo de GPU por quadro, em ms, forçando o fim de cada render
     bench(n = 10) {
@@ -2469,11 +2519,14 @@ const GFX = (() => {
 </script>
 <script>
 (() => {
-const M = MTM, N = M.N, KEY = 'mtm-prosp-v1';
+const QS = new URLSearchParams(location.search);
+// o autoteste (?selftest) usa um save próprio para nunca mexer no progresso do jogador
+const M = MTM, N = M.N, KEY = QS.has('selftest') ? 'mtm-selftest' : 'mtm-prosp-v1';
 const $ = id => document.getElementById(id);
 const S = { camp: null, ex: null, sel: -1, layer: 'he', reveal: false, hc: false, sound: true, brief: { reg: 'tranq', con: 'padrao', hard: false, insurance: false }, busy: false, hardAcc: 0, charPick: null, idPick: null,
   // v1.0: acessibilidade (item 19) e gráficos (item 23)
-  cb: 'padrao', flash: true, vibe: true, calm: false, gfx: null, scan: null, swapping: false };
+  cb: 'padrao', flash: true, vibe: true, calm: false, gfx: null, scan: null, swapping: false,
+  tool: null, hover: -1, ping: null, meiLast: '', meiClosed: false, baseBubbleOff: '' }; // v1.2
 const UNLOCK_KEY = 'mtm-unlocks'; // desbloqueios que valem entre campanhas (sócios Artemis, D-CAM3-2)
 const unlocks = (() => { try { return JSON.parse(localStorage.getItem(UNLOCK_KEY) || '{}') || {}; } catch (e) { return {}; } })();
 const saveUnlocks = () => { try { localStorage.setItem(UNLOCK_KEY, JSON.stringify(unlocks)); } catch (e) {} };
@@ -2543,7 +2596,7 @@ function coinTier(cr) {
 }
 
 // ---------- salvar ----------
-function save() { try { localStorage.setItem(KEY, JSON.stringify({ camp: S.camp, ex: S.ex && !S.ex.over ? S.ex : null, hc: S.hc, sound: S.sound, brief: S.brief, helpSeen: S.helpSeen, cb: S.cb, flash: S.flash, vibe: S.vibe, calm: S.calm, gfx: S.gfx })); } catch (e) {} }
+function save() { try { localStorage.setItem(KEY, JSON.stringify({ camp: S.camp, ex: S.ex && !S.ex.over ? S.ex : null, hc: S.hc, sound: S.sound, brief: S.brief, helpSeen: S.helpSeen, cb: S.cb, flash: S.flash, vibe: S.vibe, calm: S.calm, gfx: S.gfx, gfxAsked: S.gfxAsked })); } catch (e) {} }
 function load() {
   let d = null; try { d = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
   const hd = window.claude?.hot?.data; if (hd && hd.camp) d = hd;
@@ -2565,12 +2618,12 @@ function load() {
     // campos da v1.0 (saves da v0.8)
     if (S.camp.base === undefined) S.camp.base = null;
     if (!S.camp.adDay || typeof S.camp.adDay !== 'object') S.camp.adDay = { d: '', n: 0 };
-    if (S.ex) { S.ex.satCool = S.ex.satCool || 0; S.ex.stats.focus = S.ex.stats.focus || 0; }
+    if (S.ex) { S.ex.satCool = S.ex.satCool || 0; S.ex.satPasses = S.ex.satPasses || (S.ex.orbital ? 1 : 0); for (const k of S.ex.known) if (k.orb && !k.orb.n) Object.assign(k.orb, { n: 1, w: 1 / 16, b: M.TECH.orbital.block[k.orb.lv || 0] }); }
     if (S.camp.won) { unlocks.artemis = true; saveUnlocks(); }
   } else S.camp = M.newCampaign();
   if (d) {
     S.cb = RAMPS[d.cb] ? d.cb : 'padrao'; S.flash = d.flash !== false; S.vibe = d.vibe !== false; S.calm = !!d.calm;
-    S.gfx = ['alto', 'leve', 'off'].includes(d.gfx) ? d.gfx : null;
+    S.gfx = ['alto', 'leve', 'off'].includes(d.gfx) ? d.gfx : null; S.gfxAsked = !!d.gfxAsked;
   }
   // gráficos: o padrão é Alto; aparelho com pouca memória começa no Leve
   if (!S.gfx) S.gfx = (navigator.deviceMemory && navigator.deviceMemory <= 2) ? 'leve' : 'alto';
@@ -2953,6 +3006,8 @@ function draw() {
     else if (!g3) glow(i, w.mode === 'he' ? '255,179,71' : '134,232,184', w.grade === 'jackpot' ? .42 : w.grade === 'bom' ? .34 : .24);
   }
   if (S.scan) drawSat(W);
+  if (S.tool === 'radar' && !ex.over) { const h = S.hover >= 0 ? S.hover : S.sel; if (h >= 0) drawRadarHolo(h); }
+  if (S.ping) drawRadarHolo(S.ping.i, Math.min(1, (performance.now() - S.ping.t0) / 900));
   // seleção
   if (S.sel >= 0) { ctx.strokeStyle = '#ffb347'; ctx.lineWidth = 3; ctx.shadowColor = 'rgba(255,179,71,.8)'; ctx.shadowBlur = 8; ctx.strokeRect((S.sel % N) * CS + 1.5, (S.sel / N | 0) * CS + 1.5, CS - 3, CS - 3); ctx.shadowBlur = 0; }
 }
@@ -3034,10 +3089,20 @@ function markRock(i, faint) {
 cv.addEventListener('click', e => {
   if (!S.ex || S.busy) return; const r = cv.getBoundingClientRect();
   const x = Math.floor((e.clientX - r.left) / (r.width / N)), y = Math.floor((e.clientY - r.top) / (r.height / N));
-  if (x < 0 || y < 0 || x >= N || y >= N) return; S.sel = y * N + x; SFX.tap(); renderExp(); checkCorpTip();
+  if (x < 0 || y < 0 || x >= N || y >= N) return; S.sel = y * N + x;
+  if (S.tool && !S.ex.over) return useTool(S.tool, S.sel); // v1.2: ferramenta ativa age direto na célula tocada
+  SFX.tap(); renderExp(); checkCorpTip();
 });
+// v1.2: holograma do radar acompanha o cursor no PC
+cv.addEventListener('mousemove', e => {
+  if (S.tool !== 'radar') return; const r = cv.getBoundingClientRect();
+  const x = Math.floor((e.clientX - r.left) / (r.width / N)), y = Math.floor((e.clientY - r.top) / (r.height / N));
+  const h = x >= 0 && y >= 0 && x < N && y < N ? y * N + x : -1; if (h !== S.hover) { S.hover = h; draw(); }
+});
+cv.addEventListener('mouseleave', () => { if (S.hover >= 0) { S.hover = -1; draw(); } });
 cv.addEventListener('keydown', e => {
   if (!S.ex) return;
+  if (e.key === 'Escape' && S.tool) { setTool(null); return; }
   if (e.key === 'Enter' && S.sel >= 0 && !S.busy && $('ov').hidden && !M.can(S.camp, S.ex, 'drill', S.sel)) { e.preventDefault(); return checkDrillWarning(S.sel); }
   const d = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -N, ArrowDown: N }[e.key]; if (d === undefined) return;
   e.preventDefault(); let s = S.sel < 0 ? S.ex.site.lander : S.sel + d; if (s < 0 || s >= N * N || (Math.abs(d) === 1 && (s / N | 0) !== (S.sel / N | 0))) s = S.sel; S.sel = s; renderExp();
@@ -3072,7 +3137,7 @@ function meiLine() {
   }
   if (c.char === 'piloto' && !ex.relocated && S.sel < 0 && ex.orbital) return 'O Bayo pode decolar com o módulo uma vez. Escolha uma célula perto das manchas mais fortes e toque em "Mover o módulo": longe dele, cada ação gasta O₂ extra.';
   if (k && !k.smp && ex.known[S.sel].orb && M.estimate(c, ex, S.sel).fresh > .35) return 'Cuidado: cratera nova aqui perto. O satélite costuma superestimar o hélio lunar nesse solo jovem, e tem muita rocha.';
-  if (ex.orbital && !(ex.satCool > 0) && !ex.stats.focus) return 'O satélite voltou a passar sobre a área. Toque numa célula e use o Foco 3×3: ele lê cada célula do quadrado, com menos erro que a primeira varredura.';
+  if (ex.orbital && !(ex.satCool > 0) && (ex.satPasses || 0) < CFG.maxPasses && (ex.satPasses || 0) < 3) return 'O satélite voltou a passar sobre a área. Cada passagem lê o solo em blocos menores: com 3 ou 4 passagens o mapa fica bem mais confiável.';
   return ['Satélite mostra onde procurar. Amostra mostra o que tem. Radar mostra se dá para furar.', 'O hélio lunar paga as contas. O₂ compra tempo. Às vezes vale furar só para respirar.', 'Crateras com raios claros são jovens: menos hélio lunar, mais rocha, um pouco mais de O₂.'][c.exp % 3];
 }
 
@@ -3109,8 +3174,9 @@ function renderExp() {
   renderSatBtn();
   $('b-home').innerHTML = ex.over ? '<svg class="icon"><use href="#i-home"/></svg>Centro' : '<svg class="icon"><use href="#i-home"/></svg>Voltar';
   $('b-home').title = ex.over ? 'Centro de operações' : 'Voltar à base (encerra a expedição)';
-  $('mei-txt').textContent = meiLine();
+  showMei(meiLine());
   renderTutorialImg(meiState);
+  renderToolbar(); renderBaseBubble();
   $('cellcard').innerHTML = ex.over ? endCard() : cellCard();
   draw(); syncTimer();
 }
@@ -3149,23 +3215,25 @@ function renderSatBtn() {
   const ex = S.ex, c = S.camp, b = $('b-sat'); if (!ex) return;
   b.hidden = ex.over; b.classList.remove('ready');
   let lbl, cost, dis, fill = 0;
-  if (!ex.orbital) { lbl = 'Satélite'; cost = M.COST.orbital.cr + ' cr'; dis = c.credits < M.COST.orbital.cr; }
-  else if (ex.satCool > 0) { lbl = 'Em órbita'; cost = `volta em ${Math.ceil(ex.satCool)} s`; dis = true; fill = 100 * (1 - ex.satCool / M.orbitSec(c)); }
-  else { lbl = 'Foco 3×3'; cost = S.sel >= 0 ? M.focusCr(c) + ' cr' : 'toque numa célula'; dis = !!M.can(c, ex, 'focus', S.sel); fill = 100; b.classList.toggle('ready', !dis); }
+  const n = ex.satPasses || 0;
+  if (!n) { lbl = 'Satélite'; cost = M.passCost(c, ex) + ' cr'; dis = !!M.can(c, ex, 'orbital'); }
+  else if (n >= CFG.maxPasses) { lbl = 'Satélite'; cost = `${n}/${CFG.maxPasses} passagens`; dis = true; fill = 100; }
+  else if (ex.satCool > 0) { lbl = `Em órbita ${n}/${CFG.maxPasses}`; cost = `volta em ${Math.ceil(ex.satCool)} s`; dis = true; fill = 100 * (1 - ex.satCool / M.orbitSec(c)); }
+  else { lbl = `Passagem ${n + 1}/${CFG.maxPasses}`; cost = M.passCost(c, ex) + ' cr'; dis = !!M.can(c, ex, 'orbital'); fill = 100; b.classList.toggle('ready', !dis); }
   $('sat-lbl').textContent = lbl; $('sat-cost').textContent = cost; b.disabled = dis || !!S.scan;
   $('sat-fill').style.width = fill + '%';
-  b.title = !ex.orbital ? 'Varredura completa do mapa (1× por expedição)' : 'Varredura focada: lê célula a célula um quadrado 3×3 em volta da seleção';
+  b.title = 'Cada passagem do satélite lê o mapa em blocos menores: 1 passagem dá só uma ideia; várias passagens mostram o solo de verdade';
 }
 setInterval(() => {
   const ex = S.ex;
   if (!ex || ex.over || !(ex.satCool > 0) || $('s-exp').hidden || !$('ov').hidden || S.busy) return; // pausa com janela aberta
-  if (M.tickOrbit(ex, 1) === 0) { SFX.ping(); toast('Satélite sobre a área: Foco 3×3 liberado.'); save(); renderExp(); }
+  if (M.tickOrbit(ex, 1) === 0) { SFX.ping(); toast(`Satélite sobre a área: passagem ${ex.satPasses + 1} liberada.`); save(); renderExp(); }
   else renderSatBtn();
 }, 1000);
 
 function cellCard() {
   const ex = S.ex, c = S.camp, i = S.sel;
-  if (i < 0) return `<div class="card"><p class="muted">Toque numa célula do mapa para ver o que se sabe dela e agir. O hexágono âmbar é o seu módulo de pouso.</p></div>`;
+  if (i < 0) return `<div class="card"><p class="muted">Toque numa célula do mapa para ver o que se sabe dela. Para agir, escolha uma ferramenta acima (Amostra, Radar, Perfurar) e toque nas células. O hexágono âmbar é o seu módulo de pouso.</p></div>`;
   const k = ex.known[i], e = M.estimate(c, ex, i);
   if (k.well) {
     const w = k.well;
@@ -3173,15 +3241,13 @@ function cellCard() {
       <p>${w.grade === 'seco' ? `<span class="bad">Poço seco.</span> ${w.reason === 'rocha' ? 'A broca travou em rocha.' : 'Teor abaixo do corte.'}` : w.mode === 'he' ? `Poço de hélio lunar: <b class="num amb">+${fmt(w.value)} cr</b> (${w.grade}).` : `Poço de O₂: <b class="num o2c">+${fmt(w.value)} O₂</b> (${w.grade}).`}</p></div>`;
   }
   const facts = [];
-  if (k.orb) facts.push(['Satélite', `~${heTxt(k.orb.he)} · ~${o2Txt(k.orb.o2)} <span class="muted">${k.orb.fine ? `(foco célula a célula, ±${Math.round(k.orb.unc * 100)}%)` : `(média de ${M.TECH.orbital.block[k.orb.lv ?? 0]}×${M.TECH.orbital.block[k.orb.lv ?? 0]} células, ±${Math.round(M.TECH.orbital.noise[k.orb.lv ?? 0] * 100)}%)`}</span>`]);
+  if (k.orb) facts.push(['Satélite', `~${heTxt(k.orb.he)} · ~${o2Txt(k.orb.o2)} <span class="muted">(${k.orb.n || 1} passagem(ns), ${k.orb.fine ? 'célula a célula' : `blocos de até ${k.orb.b}×${k.orb.b}`}, ±${Math.round(k.orb.unc * 100)}%)</span>`]);
   if (k.smp) facts.push(['Amostra', `${heTxt(k.smp.he)} · ${o2Txt(k.smp.o2)} <span class="muted">(±${Math.round(k.smp.unc * 100)}%)</span>`]);
   if (k.radar) facts.push(['Radar', `${depthViz(k.radar.T, k.radar.unc)} · ${k.radar.rock ? '<span class="bad">rocha detectada</span>' : 'sem rocha detectada'}`]);
   if (!facts.length) facts.push(['Dados', '<span class="muted">nenhum ainda</span>']);
   if (c.char === 'piloto') facts.push(['Módulo', i === ex.site.lander ? 'você está no módulo · sem deslocamento' : `${M.dist(i, ex.site.lander)} célula(s) · <span class="${e.travel ? 'bad' : ''}">+${e.travel} O₂ de deslocamento por ação</span>`]);
   const risk = e.rockKnown ? '<span class="bad">rocha detectada: a broca pode travar</span>' : e.rockP < .06 ? 'baixo' : e.rockP < .2 ? 'médio' : '<span class="bad">alto</span>';
   const brk = e.pBreak ? `<span class="${e.src === 'nenhuma' ? 'bad' : ''}">${Math.round(e.pBreak * 100)}%</span> <span class="muted">(amostra no ponto zera)</span>` : '<span class="o2c">nenhum: tem amostra</span>';
-  const sCr = M.sampleCr(c), rCr = M.radarCr(c, ex);
-  const cS = M.can(c, ex, 'sample', i), cR = M.can(c, ex, 'radar', i), cD = M.can(c, ex, 'drill', i);
   const heMax = 500;
   // item 22: na frente, só o elemento dominante e a confiança; os números ficam em "Ver números"
   return `<div class="card cell"><h3><span>Célula ${cellName(i)}</span><span class="eyebrow">fonte: ${e.src}${k.radar ? ' + radar' : ''}</span></h3>
@@ -3192,11 +3258,7 @@ function cellCard() {
       <dl class="facts">${facts.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}<dt>Risco de rocha</dt><dd>${risk}</dd><dt>Quebra da broca</dt><dd>${brk}</dd></dl>
       <div><div class="eyebrow" style="margin-bottom:4px">Retorno estimado de um poço de hélio lunar (cr)</div>${rangeBar(e.heLo, e.heHi, e.heMid, M.COST.drill.cr, heMax, 'var(--he)')}</div>
     </div></details>
-    <div class="row actions">
-      <button class="btn stack" id="a-sample" ${cS ? 'disabled' : ''} title="${cS}"><span><svg class="icon"><use href="#i-core"/></svg> Amostra</span><span class="cost">${sCr} cr · ${M.sampleO2(c) + e.travel} O₂</span></button>
-      <button class="btn stack" id="a-radar" ${cR ? 'disabled' : ''} title="${cR}"><span><svg class="icon"><use href="#i-radar"/></svg> Radar</span><span class="cost">${rCr ? rCr + ' cr' : 'grátis (Argo-7)'} · ${M.radarO2(c, ex) + e.travel} O₂</span></button>
-      <button class="btn stack primary" id="a-drill" ${cD ? 'disabled' : ''} title="${cD}"><span><svg class="icon"><use href="#i-drill"/></svg> Perfurar</span><span class="cost">${ex.drillMaint > 0 ? `manutenção · ${Math.ceil(ex.drillMaint)} s` : `${M.COST.drill.cr} cr · ${e.o2CostLo}–${e.o2CostHi} O₂`}</span></button>
-    </div>${cS && cD ? `<p class="muted" style="font-size:.85rem">${cD || cS}.</p>` : ''}
+    ${S.tool ? `<p class="toolhint">Ferramenta ativa: <b>${TOOL_NAME[S.tool]}</b>. Toque nas células do mapa · toque em ${TOOL_NAME[S.tool]} de novo para sair.</p>` : ''}
     ${c.char === 'piloto' && !ex.relocated && i !== ex.site.lander ? `<button class="btn" id="a-move"><svg class="icon"><use href="#i-shuttle"/></svg>Mover o módulo para ${cellName(i)} <span class="cost">grátis · 1× por expedição</span></button>` : ''}</div>`;
 }
 
@@ -3282,9 +3344,7 @@ function baseOffer(ex) {
 $('panel').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || S.busy) return;
   const ex = S.ex, c = S.camp, i = S.sel;
-  if (b.id === 'a-sample') { const r = M.doSample(c, ex, i); if (r.err) return toast(r.err); SFX.sample(r.smp.he); toast(`Laudo da Mei: ${fmtHe(r.smp.he)} de hélio lunar, O₂ ${displayO2(r.smp.o2)}/10.`); after(); }
-  if (b.id === 'a-radar') { const r = M.doRadar(c, ex, i); if (r.err) return toast(r.err); SFX.radar(); toast(r.rocks ? `Radar: ${r.rocks} ponto(s) com rocha.` : 'Radar: nenhuma rocha detectada.'); after(); }
-  if (b.id === 'a-drill') checkDrillWarning(i);
+  if (b.dataset.tool) return toolButton(b.dataset.tool);
   if (b.id === 'a-ad') openAd();
   if (b.id === 'a-move') { const r = M.doRelocate(c, ex, i); if (r.err) return toast(r.err); SFX.sat(); toast(`Bayo pousou o módulo em ${cellName(i)}.`); after(); }
   if (b.id === 'a-share') share();
@@ -3294,6 +3354,129 @@ $('panel').addEventListener('click', e => {
 });
 $('panel').addEventListener('toggle', e => { if (e.target.matches && e.target.matches('details.nums')) S.openNums = e.target.open; }, true);
 function after() { save(); renderExp(); check2k(); checkCorpTip(); }
+
+// ---------- v1.2 · ferramentas: Amostra, Radar e Perfurar ficam acima do painel ----------
+// Tocar numa ferramenta: se já há célula escolhida, age nela; a ferramenta fica ativa (o cursor muda)
+// e cada toque no mapa usa a ferramenta. Tocar de novo na ferramenta (ou Esc) desliga.
+const svgCur = (svg, x, y) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'>${svg}</svg>`)}") ${x} ${y}, crosshair`;
+const CURSOR = {
+  // tubo de ensaio com líquido ciano e uma molécula
+  sample: svgCur(`<path d='M12 3h10M14 3v18a3 3 0 0 0 6 0V3' fill='#ece7dc' stroke='#07090d' stroke-width='3' stroke-linejoin='round'/><path d='M14 3v18a3 3 0 0 0 6 0V3' fill='none' stroke='#ece7dc' stroke-width='1.6'/><path d='M14.8 13h4.4v8a2.2 2.2 0 0 1-4.4 0z' fill='#52d9ea'/><path d='M6 9 5 16' stroke='#ffb347' stroke-width='1.4'/><g fill='#ffb347' stroke='#07090d'><circle cx='6' cy='9' r='2.6'/><circle cx='5' cy='16' r='1.8'/><circle cx='3' cy='29' r='2.2'/></g>`, 3, 29),
+  // sonar: antena com ondas
+  radar: svgCur(`<path d='M6 26a14 14 0 0 1 20 0M10 22a8 8 0 0 1 12 0' fill='none' stroke='#07090d' stroke-width='4.5' stroke-linecap='round'/><path d='M6 26a14 14 0 0 1 20 0M10 22a8 8 0 0 1 12 0' fill='none' stroke='#52d9ea' stroke-width='2' stroke-linecap='round'/><path d='M16 4v8' stroke='#ece7dc' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='#52d9ea' stroke='#07090d' stroke-width='2'/>`, 16, 16),
+  // mini-broca: motor âmbar e ponta em espiral
+  drill: svgCur(`<g stroke='#07090d' stroke-width='1.6' stroke-linejoin='round'><rect x='8' y='2' width='16' height='8' rx='2' fill='#ffb347'/><path d='M12 10h8l-2 6h-4z' fill='#c9ced8'/><path d='M14 16h4l-2 14z' fill='#ece7dc'/></g><path d='M14.5 19l3 1.5M14.8 23l2.4 1.3' stroke='#07090d' stroke-width='1.2'/>`, 16, 30),
+};
+const TOOL_NAME = { sample: 'Amostra', radar: 'Radar', drill: 'Perfurar' };
+function setTool(t) {
+  S.tool = t || null; S.hover = -1;
+  for (const b of document.querySelectorAll('#toolbar [data-tool]')) b.setAttribute('aria-pressed', b.dataset.tool === S.tool);
+  cv.style.cursor = S.tool ? CURSOR[S.tool] : '';
+  if (S.tool === 'radar' && !holoLoop.on) { holoLoop.on = true; requestAnimationFrame(holoLoop); }
+  if (S.ex) renderExp();
+}
+function toolButton(t) {
+  const ex = S.ex; if (!ex || ex.over || S.busy) return;
+  if (S.tool === t) { SFX.tap(); return setTool(null); }
+  setTool(t); SFX.tap();
+  const k = S.sel >= 0 ? ex.known[S.sel] : null;
+  // age na célula já escolhida só se for útil (não repete laudo nem radar já passado ali)
+  if (k && !k.well && !(t === 'sample' && k.smp) && !(t === 'radar' && k.radar)) return useTool(t, S.sel);
+  toast(`${TOOL_NAME[t]}: toque numa célula do mapa. Toque em ${TOOL_NAME[t]} de novo para sair.`);
+}
+function useTool(t, i) {
+  const ex = S.ex, c = S.camp; if (!ex || ex.over || S.busy || !$('ov').hidden) return;
+  S.sel = i;
+  if (t === 'sample' && ex.known[i].smp && !ex.known[i].well) { renderExp(); return toast(`${cellName(i)} já tem laudo: ${fmtHe(ex.known[i].smp.he)}.`); }
+  if (t === 'sample') { const r = M.doSample(c, ex, i); if (r.err) { renderExp(); return toast(r.err); } SFX.sample(r.smp.he); toast(`Laudo da Mei: ${fmtHe(r.smp.he)} de hélio lunar, O₂ ${displayO2(r.smp.o2)}/10.`); after(); }
+  if (t === 'radar') { const r = M.doRadar(c, ex, i); if (r.err) { renderExp(); return toast(r.err); } SFX.radar(); radarPing(i); toast(r.rocks ? `Radar: ${r.rocks} ponto(s) com rocha.` : 'Radar: nenhuma rocha detectada.'); after(); }
+  if (t === 'drill') { const e = M.can(c, ex, 'drill', i); renderExp(); if (e) return toast(e); checkDrillWarning(i); }
+}
+// custos na barra: da célula escolhida (ou valores de referência)
+function renderToolbar() {
+  const ex = S.ex, c = S.camp, i = S.sel, bar = $('toolbar');
+  bar.hidden = ex.over;
+  if (ex.over) { if (S.tool) { S.tool = null; cv.style.cursor = ''; } return; }
+  const tr = i >= 0 ? M.travelO2(c, ex, i) : 0, e = i >= 0 && !ex.known[i].well ? M.estimate(c, ex, i) : null, rCr = M.radarCr(c, ex);
+  $('c-sample').textContent = `${M.sampleCr(c)} cr · ${M.sampleO2(c) + tr} O₂`;
+  $('c-radar').textContent = `${rCr ? rCr + ' cr' : 'grátis'} · ${M.radarO2(c, ex) + tr} O₂`;
+  $('c-drill').textContent = ex.drillMaint > 0 ? `manutenção ${Math.ceil(ex.drillMaint)} s` : `${M.COST.drill.cr} cr · ${e ? `${e.o2CostLo}–${e.o2CostHi}` : '12–25'} O₂`;
+  for (const b of bar.querySelectorAll('[data-tool]')) {
+    const why = i >= 0 ? M.can(c, ex, b.dataset.tool, i) : '';
+    b.title = why || `${TOOL_NAME[b.dataset.tool]}: toque e depois escolha as células`;
+    b.setAttribute('aria-pressed', b.dataset.tool === S.tool);
+  }
+}
+// radar (v1.2): circunferência holográfica com o alcance, e um pulso quando ele é usado
+function radarReach() { return M.TECH.radar.radius[S.camp.tech.radar]; }
+function radarPing(i) {
+  if (S.calm) return; S.ping = { i, t0: performance.now() };
+  const step = () => { if (!S.ping) return; if (performance.now() - S.ping.t0 > 900) { S.ping = null; draw(); return; } draw(); requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function drawRadarHolo(i, p) {
+  const R = radarReach(), x0 = i % N, y0 = i / N | 0, cx = (x0 + .5) * CS, cy = (y0 + .5) * CS, he = `${HE}`;
+  const rr = (R + .5) * CS * Math.SQRT2; // a circunferência passa pelos cantos do quadrado de alcance
+  ctx.save();
+  // quadrados que o radar vai cobrir
+  for (let y = y0 - R; y <= y0 + R; y++) for (let x = x0 - R; x <= x0 + R; x++) {
+    if (x < 0 || y < 0 || x >= N || y >= N) continue;
+    ctx.fillStyle = `rgba(${he},${p == null ? .14 : .24 * (1 - p)})`; ctx.fillRect(x * CS + 1, y * CS + 1, CS - 2, CS - 2);
+  }
+  const t = performance.now() / 1000, scale = p == null ? 1 : .3 + .9 * p;
+  ctx.shadowColor = `rgba(${he},.9)`; ctx.shadowBlur = 10;
+  ctx.strokeStyle = `rgba(${he},${p == null ? .9 : 1 - p})`; ctx.lineWidth = 2;
+  ctx.setLineDash([CS * .35, CS * .2]); ctx.lineDashOffset = -t * 30;
+  ctx.beginPath(); ctx.arc(cx, cy, rr * scale, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.lineWidth = 1; ctx.globalAlpha = p == null ? .55 : .4 * (1 - p);
+  ctx.beginPath(); ctx.arc(cx, cy, rr * .55 * scale, 0, Math.PI * 2); ctx.stroke();
+  if (p == null) { // varredura girando dentro do holograma e o tamanho do alcance
+    const a = t * 2.4 % (Math.PI * 2), g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rr);
+    g.addColorStop(0, `rgba(${he},.35)`); g.addColorStop(1, `rgba(${he},0)`);
+    ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, rr, a, a + .6); ctx.closePath(); ctx.fill();
+    ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 4; ctx.fillStyle = `rgba(${he},1)`; ctx.font = `700 ${Math.max(10, CS * .3)}px Share Tech Mono, monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(`alcance ${2 * R + 1}×${2 * R + 1}`, Math.min(Math.max(cx, CS * 1.6), CS * (N - 1.6)), Math.max(CS * .45, cy - rr - 2));
+  }
+  ctx.restore();
+}
+// o holograma gira enquanto a ferramenta Radar está ativa (20 fps bastam)
+function holoLoop(n) { if (S.tool !== 'radar' || !S.ex || S.ex.over || S.calm) { holoLoop.on = false; return; } requestAnimationFrame(holoLoop); if (!$('s-exp').hidden && (S.hover >= 0 || S.sel >= 0) && n - (holoLoop.t || 0) > 50) { holoLoop.t = n; draw(); } }
+
+// ---------- v1.2 · balões flutuantes: Mei e "voltar à base" ----------
+function showMei(line) {
+  const box = $('mei'), chip = $('mei-chip');
+  if (!line) { box.hidden = true; chip.hidden = true; return; }
+  if (line !== S.meiLast) {
+    S.meiLast = line; S.meiClosed = false; clearTimeout(showMei.h);
+    // fora do tutorial a dica some sozinha; no tutorial fica até a próxima etapa (ou até fechar)
+    showMei.h = setTimeout(() => { S.meiClosed = true; $('mei').hidden = true; $('mei-chip').hidden = false; }, S.camp.tutorial ? 15000 : 9000);
+  }
+  $('mei-txt').textContent = line; box.hidden = S.meiClosed; chip.hidden = !S.meiClosed;
+}
+$('mei-x').onclick = () => { S.meiClosed = true; $('mei').hidden = true; $('mei-chip').hidden = false; };
+$('mei-chip').onclick = () => { S.meiClosed = false; $('mei').hidden = false; $('mei-chip').hidden = true; clearTimeout(showMei.h); };
+// sem créditos para furar, ou com O₂ que não paga nem o furo mais raso: sugere voltar
+function noDrillReason() {
+  const ex = S.ex, c = S.camp; if (!ex || ex.over) return '';
+  if (c.credits < M.COST.drill.cr) return `Seus créditos (₡ ${fmt(c.credits)}) não pagam mais uma perfuração (₡ ${M.COST.drill.cr}).`;
+  if (ex.o2 < M.drillO2(1.5)) return `Com ${Math.round(ex.o2)} de O₂, qualquer furo zera o oxigênio e chama o resgate.`;
+  return '';
+}
+function renderBaseBubble() {
+  const why = noDrillReason(), box = $('base-bubble');
+  if (!why || S.baseBubbleOff === why || S.busy) { box.hidden = true; return; }
+  if (box.hidden) { SFX.alarm(); feel('alarm'); }
+  box.innerHTML = `<b style="font-family:var(--f-display);font-size:1.15rem;text-transform:uppercase;color:var(--alert)">Hora de voltar à base</b>
+    <span style="font-size:.92rem">${why} Voltar agora garante o que você já vendeu${S.ex.contract === 'oxigenio' ? ' e o O₂ que sobrou' : ''}.</span>
+    <div class="row"><button class="btn" id="bb-stay">Ficar mais</button><button class="btn primary" id="bb-home"><svg class="icon"><use href="#i-home"/></svg>Voltar à base</button></div>`;
+  box.hidden = false;
+}
+$('base-bubble').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'bb-stay') { S.baseBubbleOff = noDrillReason(); $('base-bubble').hidden = true; }
+  if (b.id === 'bb-home') { $('base-bubble').hidden = true; returnToBase(); }
+});
+
 
 // ---------- selo de decisão: perfurar no escuro (item 4) ----------
 // sem satélite e sem amostra na célula: confirma antes; depois de 3 confirmações o aviso some
@@ -3400,6 +3583,7 @@ $('sheet').addEventListener('click', e => {
   if (b.id === 'corp-ok') { closeSheet(); renderExp(); afterSheet(); }
   if (b.id === 'ad-cancel') { S.adOn = false; clearInterval(showRewarded.h); closeSheet(); if (S.ex) renderExp(); }
   if (b.id === 'ad-done') { S.adOn = false; const cb = showRewarded.cb; showRewarded.cb = null; closeSheet(); if (cb) cb(); }
+  if (b.dataset.gfx) { S.gfx = b.dataset.gfx; S.gfxAsked = true; save(); closeSheet(); bootGfx(); renderHub(); toast(S.gfx === 'alto' ? 'Modo Qualidade.' : 'Modo Desempenho.'); if (!S.helpSeen) openHelp(0); return; }
   if (b.id === 'post-share') sharePost();
   if (b.id === 'post-save') savePost();
   if (b.id === 'nov-no') { closeSheet(); renderExp(); checkCorpTip(); }
@@ -3530,9 +3714,21 @@ function goHub() { if (S.ex && S.ex.over) S.ex = null; S.reveal = false; S.sel =
 
 // ---------- SÓCIO ----------
 const charLocked = ch => ch.artemis && !unlocks.artemis; // D-CAM3-2: arte visível com cadeado até bater a meta
+// v1.2: sócios sem arte (Sete e Ten. Bayo) só aparecem com "Personagens experimentais" ligado no Low Code;
+// quem já joga com um deles continua vendo o seu
+const EXPERIMENTAL = ['robo', 'piloto'];
+const charVisible = ch => !EXPERIMENTAL.includes(ch.id) || CFG.experimental || S.camp.char === ch.id;
 function renderChar() {
-  $('char-list').innerHTML = Object.values(M.CHARS).map(ch => `<button class="card pick${charLocked(ch) ? ' locked' : ''}" data-char="${ch.id}" aria-pressed="${S.charPick === ch.id}"${charLocked(ch) ? ` aria-disabled="true" title="Bata a meta de ₡ ${fmt(CFG.goal)} para desbloquear"` : ''}>${charLocked(ch) ? `<span class="lock-tag"><svg aria-hidden="true"><use href="#i-lock"/></svg>Meta ₡ ${fmt(CFG.goal)}</span>` : ''}${ART[ch.id] ? `<span class="char-portrait" data-c="${ch.id}" style="background-image:url(${ART[ch.id]})" role="img" aria-label="Retrato de ${esc(ch.nome)}"></span>` : `<span class="char-portrait placeholder" data-c="${ch.id}" role="img" aria-label="Retrato provisório de ${esc(ch.nome)}"><svg><use href="#${ch.id === 'piloto' ? 'i-shuttle' : 'i-robot'}"/></svg></span>`}${ch.artemis ? '<span class="artemis">Sócio Artemis</span>' : ''}<span class="titulo">${ch.titulo}</span><h3>${esc(ch.nome)}</h3><p class="muted">${ch.desc}</p><p class="vant">Vantagem: ${ch.bonus}</p><p class="custo">Custo: ${ch.onus}</p></button>`).join('');
+  $('char-list').innerHTML = Object.values(M.CHARS).filter(charVisible).map(ch => `<button class="card pick${charLocked(ch) ? ' locked' : ''}" data-char="${ch.id}" aria-pressed="${S.charPick === ch.id}"${charLocked(ch) ? ` aria-disabled="true" title="Bata a meta de ₡ ${fmt(CFG.goal)} para desbloquear"` : ''}>${charLocked(ch) ? `<span class="lock-tag"><svg aria-hidden="true"><use href="#i-lock"/></svg>Meta ₡ ${fmt(CFG.goal)}</span>` : ''}${ART[ch.id] ? `<span class="char-portrait" data-c="${ch.id}" style="background-image:url(${ART[ch.id]})" role="img" aria-label="Retrato de ${esc(ch.nome)}"></span>` : `<span class="char-portrait placeholder" data-c="${ch.id}" role="img" aria-label="Retrato provisório de ${esc(ch.nome)}"><svg><use href="#${ch.id === 'piloto' ? 'i-shuttle' : 'i-robot'}"/></svg></span>`}${ch.artemis ? '<span class="artemis">Sócio Artemis</span>' : ''}<span class="titulo">${ch.titulo}</span><h3>${esc(ch.nome)}</h3><p class="muted">${ch.desc}</p><p class="vant">Vantagem: ${ch.bonus}</p><p class="custo">Custo: ${ch.onus}</p></button>`).join('');
   $('b-char-go').disabled = !S.charPick;
+  // balão "Vamos nessa?" preso embaixo da tela: confirma sem precisar rolar
+  const ch = S.charPick && M.CHARS[S.charPick], bal = $('char-balloon');
+  bal.hidden = !ch;
+  if (ch) {
+    $('char-balloon-face').style.backgroundImage = ART[ch.id] ? `url(${ART[ch.id]})` : 'none';
+    $('char-balloon-txt').textContent = S.swapping ? 'Trocamos de sócio?' : ['Vamos nessa?', 'Fechado?', 'Partiu Lua?'][Object.keys(M.CHARS).indexOf(ch.id) % 3];
+    $('char-balloon-sub').textContent = `${ch.nome} · ${ch.bonus}`;
+  }
 }
 $('char-list').addEventListener('click', e => {
   const b = e.target.closest('[data-char]'); if (!b) return;
@@ -3549,6 +3745,7 @@ $('b-char-go').onclick = () => {
   }
   renderIdentity(true); show('s-identity');
 };
+$('b-char-go2').onclick = () => $('b-char-go').click();
 $('b-switch').onclick = () => { SFX.tap(); S.swapping = true; S.charPick = S.camp.char; renderChar(); show('s-char'); };
 
 // ---------- IDENTIDADE ----------
@@ -3567,6 +3764,19 @@ function idPreview() {
   $('id-preview-partner').textContent = ch ? `Sócio: ${ch.nome}, ${ch.titulo}` : '';
 }
 $('player-name').addEventListener('input', idPreview);
+// v1.2: dado de nomes, alternando masculino e feminino (às vezes com sobrenome)
+const NAMES = {
+  m: ['Rafael', 'Thiago', 'Lucas', 'Bruno', 'Diego', 'Kenji', 'Arjun', 'Mateus', 'Caio', 'Davi', 'Enzo', 'Heitor', 'Ravi', 'Omar', 'Ivan', 'Hugo', 'Léo', 'Theo', 'Bento', 'Joaquim', 'Kofi', 'Mateo', 'Yuri', 'Noah'],
+  f: ['Ana', 'Bia', 'Camila', 'Luna', 'Iara', 'Sofia', 'Yasmin', 'Helena', 'Nina', 'Lara', 'Maya', 'Aiko', 'Valentina', 'Alice', 'Zoe', 'Manu', 'Clara', 'Lívia', 'Jade', 'Elis', 'Amara', 'Yuki', 'Rosa', 'Cecília'],
+  sob: ['Vega', 'Nova', 'Rocha', 'Sol', 'Lima', 'Castro', 'Okafor', 'Tanaka', 'Silva', 'Costa', 'Orion', 'Kepler', 'Lua', 'Estrela'],
+};
+let diceFem = Math.random() < .5;
+$('b-dice').onclick = () => {
+  diceFem = !diceFem; const pick = a => a[Math.floor(Math.random() * a.length)];
+  let n = pick(NAMES[diceFem ? 'f' : 'm']); if (Math.random() < .45) n += ' ' + pick(NAMES.sob);
+  $('player-name').value = n.slice(0, 20); idPreview(); SFX.tap();
+  const d = $('b-dice'); d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll');
+};
 $('player-name').addEventListener('keydown', e => { if (e.key === 'Enter') $('b-id-go').click(); });
 $('avatar-grid').addEventListener('click', e => { const b = e.target.closest('[data-av]'); if (!b) return; S.idPick.icon = b.dataset.av; SFX.tap(); renderIdentity(); });
 $('color-row').addEventListener('click', e => { const b = e.target.closest('[data-col]'); if (!b) return; S.idPick.color = b.dataset.col; SFX.tap(); renderIdentity(); });
@@ -3595,13 +3805,13 @@ $('b-chal-back').onclick = () => { renderHub(); show('s-hub'); };
 // ---------- LOW CODE ----------
 const LC = {
   'lc-eco': [['startCredits', 'Créditos iniciais (nova campanha)', 'number', 0, 1], ['drillCost', 'Custo da perfuração (cr)', 'number', 1, 1], ['sampleCost', 'Custo da amostra (cr)', 'number', 0, 1], ['radarCost', 'Custo do radar (cr)', 'number', 0, 1], ['orbitalCost', 'Custo do satélite (cr)', 'number', 0, 1], ['minFund', 'Verba mínima por expedição (cr)', 'number', 0, 1], ['goal', 'Meta da campanha (cr)', 'number', 1, 10], ['insuranceCost', 'Custo do seguro de resgate (cr)', 'number', 0, 1]],
-  'lc-mec': [['rockEnabled', 'Rochas ativadas', 'checkbox'], ['hardInterval', 'Modo difícil: segundos por 1 O₂', 'number', 1, 1], ['hardMult', 'Modo difícil: multiplicador de recompensas', 'number', 1, 0.05], ['rescueBase', 'Penalidade base de resgate (cr)', 'number', 0, 1], ['brkNoData', 'Quebra da broca sem dados (0–1)', 'number', 0, 0.01], ['brkSat', 'Quebra da broca só com satélite (0–1)', 'number', 0, 0.01], ['maintSec', 'Manutenção da broca (s)', 'number', 1, 1], ['adSec', 'Duração do anúncio simulado (s)', 'number', 1, 1], ['focusCost', 'Satélite: custo do foco 3×3 (cr)', 'number', 0, 1], ['orbitSec', 'Satélite: segundos até voltar à área', 'number', 5, 1], ['baseRate', 'Posto avançado: créditos por hora', 'number', 0, 1], ['baseCapH', 'Posto avançado: horas máximas acumuladas', 'number', 1, 1], ['hubAdCr', 'Bônus da Selene: créditos por anúncio', 'number', 0, 10], ['hubAdPerDay', 'Bônus da Selene: anúncios por dia', 'number', 0, 1]],
+  'lc-mec': [['rockEnabled', 'Rochas ativadas', 'checkbox'], ['hardInterval', 'Modo difícil: segundos por 1 O₂', 'number', 1, 1], ['hardMult', 'Modo difícil: multiplicador de recompensas', 'number', 1, 0.05], ['rescueBase', 'Penalidade base de resgate (cr)', 'number', 0, 1], ['brkNoData', 'Quebra da broca sem dados (0–1)', 'number', 0, 0.01], ['brkSat', 'Quebra da broca só com satélite (0–1)', 'number', 0, 0.01], ['maintSec', 'Manutenção da broca (s)', 'number', 1, 1], ['adSec', 'Duração do anúncio simulado (s)', 'number', 1, 1], ['passCost', 'Satélite: custo de cada nova passagem (cr)', 'number', 0, 1], ['maxPasses', 'Satélite: passagens por expedição', 'number', 1, 1], ['orbitSec', 'Satélite: segundos entre passagens', 'number', 5, 1], ['experimental', 'Personagens experimentais (Sete e Ten. Bayo, ainda sem arte)', 'checkbox'], ['baseRate', 'Posto avançado: créditos por hora', 'number', 0, 1], ['baseCapH', 'Posto avançado: horas máximas acumuladas', 'number', 1, 1], ['hubAdCr', 'Bônus da Selene: créditos por anúncio', 'number', 0, 10], ['hubAdPerDay', 'Bônus da Selene: anúncios por dia', 'number', 0, 1]],
   'lc-vis': [['cVoid', 'Cor do espaço (fundo)', 'color'], ['cAmber', 'Cor âmbar (luz humana)', 'color'], ['cHe', 'Cor de destaque do hélio lunar', 'color'], ['cO2', 'Cor do oxigênio', 'color'], ['cAlert', 'Cor de alerta', 'color'], ['fontSize', 'Tamanho base da fonte (px)', 'number', 10, 1], ['circuit', 'Visual circuitos e chips (desligue se falhar no Safari)', 'checkbox']],
 };
 const CSSVAR = { cVoid: '--void', cAmber: '--amber', cHe: '--he', cO2: '--o2', cAlert: '--alert' };
 const hexRgb = h => /^#[0-9a-f]{6}$/i.test(h) ? [1, 3, 5].map(k => parseInt(h.slice(k, k + 2), 16)) : null;
 function applyCfgToEngine() {
-  M.COST.focus.cr = CFG.focusCost; M.COST.drill.cr = CFG.drillCost; M.COST.sample.cr = CFG.sampleCost; M.COST.radar.cr = CFG.radarCost; M.COST.orbital.cr = CFG.orbitalCost;
+  M.COST.drill.cr = CFG.drillCost; M.COST.sample.cr = CFG.sampleCost; M.COST.radar.cr = CFG.radarCost; M.COST.orbital.cr = CFG.orbitalCost;
 }
 function applyVisual() {
   const root = document.documentElement;
@@ -3690,9 +3900,9 @@ $('l-he').onclick = () => { S.layer = 'he'; renderExp(); };
 $('l-o2').onclick = () => { S.layer = 'o2'; renderExp(); };
 $('b-sat').onclick = () => {
   const ex = S.ex; if (!ex || S.busy || S.scan) return;
-  if (!ex.orbital) { const r = M.doOrbital(S.camp, ex); if (r.err) return toast(r.err); SFX.sat(); save(); startScan('full'); after(); return; }
-  const r = M.doFocus(S.camp, ex, S.sel); if (r.err) return toast(r.err);
-  SFX.sat(); setTimeout(SFX.radar, 700); save(); startScan('focus', { cells: r.cells, target: S.sel }); after();
+  const r = M.doOrbital(S.camp, ex); if (r.err) return toast(r.err);
+  SFX.sat(); save(); startScan('full'); after();
+  toast(r.pass === 1 ? `1ª passagem: blocos de ${r.block}×${r.block}, só uma ideia do solo. Passe de novo para enxergar melhor.` : `Passagem ${r.pass}: blocos de ${r.block}×${r.block}. ${r.block === 1 ? 'Leitura célula a célula!' : 'O mapa ficou mais nítido.'}`);
 };
 $('b-home').onclick = () => {
   const ex = S.ex; if (S.busy) return;
@@ -3720,7 +3930,7 @@ const HELP = [
   { ic: 'av-helmet', t: 'Sócio e crachá', b: () => `<ul class="help-list"><li><b>Sócio:</b> cada um traz uma vantagem e um custo para a campanha toda (precisão, broca, O₂, créditos, logística).</li><li><b>Crachá:</b> seu nome e sua insígnia aparecem no HUD, no briefing e no resultado.</li></ul>` },
   { ic: 'i-sat', t: 'Briefing', b: () => `<ul class="help-list"><li><b>Região:</b> Tranquilidade é calma; Tempestades é rica e rochosa (libera após 2 expedições).</li><li><b>Contrato:</b> muda o que rende bônus. Leia antes de partir.</li><li><b>Modo difícil:</b> o O₂ cai com o tempo, recompensas ×${CFG.hardMult}.</li><li><b>Seguro:</b> ${fmt(CFG.insuranceCost)} cr que anulam a multa de resgate.</li></ul>` },
   { ic: 'i-o2', t: 'Ler a tela', b: () => `<ul class="help-list"><li><b class="o2c">Tanque e borda do mapa = seu O₂.</b> A borda se apaga no sentido horário; verde é folga, âmbar é atenção, vermelho é hora de voltar.</li><li><b>Mapa:</b> quanto mais clara a cor, mais rico o solo; preto é nada. Hélio lunar vai do roxo ao azul-claro; O₂, do verde ao amarelo.</li><li><b class="amb">Moeda = créditos.</b> Bronze, prata, ouro e, a partir de ₡ 2.000, holograma.</li><li>O <b class="amb">hexágono âmbar</b> é o módulo de pouso (o mesmo desenho do botão Voltar). O círculo com seu nome é a sua <b>insígnia</b>: toque para ver o crachá. A <b>Mei</b> dá dicas no painel.</li></ul>` },
-  { ic: 'i-radar', t: 'Pesquisar', b: () => `<ul class="help-list"><li><b>Satélite</b>: a primeira passada varre o mapa todo, em blocos (média de uma área). Depois ele volta a cada ${CFG.orbitSec} s para um <b>Foco 3×3</b> (${CFG.focusCost} cr): lê célula a célula, com menos erro.</li><li><b>Amostra</b>: mede o teor exato daquele ponto. Hélio lunar em <b>lunas (ℓ)</b>; O₂ de 0 a 10.</li><li><b>Radar</b>: mostra rocha (losango vermelho) e quantas camadas de solo tem ali. Solo grosso rende mais.</li><li>Crateras com raios claros são jovens: menos hélio lunar, mais rocha.</li></ul>` },
+  { ic: 'i-radar', t: 'Pesquisar', b: () => `<ul class="help-list"><li><b>Satélite</b>: a 1ª passagem varre o mapa em blocos grandes e dá só uma ideia do solo. Ele volta a cada ${CFG.orbitSec} s: cada nova passagem (${CFG.passCost} cr) lê blocos menores, até ${CFG.maxPasses} passagens, e o mapa vai ficando nítido.</li><li><b>Amostra</b>: mede o teor exato daquele ponto. Hélio lunar em <b>lunas (ℓ)</b>; O₂ de 0 a 10.</li><li><b>Radar</b>: mostra rocha (losango vermelho) e quantas camadas de solo tem ali. Solo grosso rende mais.</li><li>Crateras com raios claros são jovens: menos hélio lunar, mais rocha.</li></ul>` },
   { ic: 'i-drill', t: 'Perfurar', b: () => `<ul class="help-list"><li>O cartão da célula diz o <b>elemento dominante</b> (hélio lunar, oxigênio, pobre ou rocha) e a <b>confiança</b>: <span class="o2c">ALTA</span> com amostra e radar, <span class="amb">MÉDIA</span> com um dos dois, <span class="bad">BAIXA</span> só com satélite. Os números ficam em "Ver números".</li><li><b class="he">Hélio lunar</b> vira créditos na hora. <b class="o2c">Oxigênio</b> compra tempo para continuar.</li><li>Rocha pode travar a broca: o poço sai seco.</li><li>Furar sem amostra pode <b class="bad">quebrar a broca</b>: ${CFG.maintSec} s de manutenção (dá para pular com um anúncio). Com amostra no ponto, não quebra.</li></ul>` },
   { ic: 'i-home', t: 'Voltar ou ser resgatado', b: () => `<ul class="help-list"><li><b>Voltar à base</b> encerra a expedição e revela o mapa real: compare com seus poços.</li><li>Se o O₂ zerar, a Selene manda o shuttle e <span class="bad">desconta o resgate</span>.</li><li>Ao bater a meta no meio da expedição, a base sugere voltar para investir.</li></ul>` },
   { ic: 'i-core', t: 'Entre expedições', b: () => `<ul class="help-list"><li><b>P&amp;D:</b> melhore satélite, radar, sonda, broca e suporte de vida.</li><li><b>Desafios:</b> metas que pagam créditos extras.</li><li><b>Relatório:</b> o histórico das suas expedições.</li><li><b>Posto avançado:</b> seu melhor poço vira uma base que rende ${CFG.baseRate} cr/h, mesmo com o jogo fechado.</li><li><b>Imagem para postar:</b> no fim de cada expedição.</li><li><b>Acessibilidade:</b> texto grande, cores para daltonismo, alertas visuais e vibração.</li></ul><p class="muted">Este guia fica no Centro de Operações e no botão <b>?</b> do mapa.</p>` },
@@ -3744,13 +3954,99 @@ $('b-help').onclick = () => { if (!S.busy) openHelp(0); };
 
 load(); applyCfgToEngine();
 // gráficos (item 23): sobe o WebGL; se falhar, segue no 2D
-if (!GFX.init({ quality: S.gfx, calm: S.calm, map: $('map3d'), sky: $('sky') })) $('map3d').hidden = true;
+// v1.1: na primeira abertura o jogador escolhe Qualidade ou Desempenho; o WebGL só sobe depois da escolha
+function bootGfx() { if (!GFX.init({ quality: S.gfx, calm: S.calm, map: $('map3d'), sky: $('sky') })) $('map3d').hidden = true; }
+function askGfx() {
+  openSheet(`<span class="eyebrow">Antes de decolar</span><h2>Como você quer jogar?</h2>
+    <div class="choice">
+      <button class="card hechoice" data-gfx="alto"><h3 class="he">✨ Qualidade</h3><p>Relevo 3D, brilho nos poços e céu animado. Para PC e celulares recentes.</p></button>
+      <button class="card o2choice" data-gfx="leve"><h3 class="o2c">⚡ Desempenho</h3><p>Relevo 3D sem o brilho e céu parado. Mais fluido e gasta menos bateria.</p></button>
+    </div>
+    <p class="muted" style="font-size:.88rem">Dá para trocar quando quiser em Ajustes → Gráficos (lá também tem o modo Econômico, em 2D).</p>`);
+}
+if (S.gfxAsked) bootGfx();
 renderHub();
-if (!S.helpSeen) openHelp(0); // primeira visita: abre o guia
+if (!S.gfxAsked) askGfx();
+else if (!S.helpSeen) openHelp(0); // primeira visita: abre o guia
 if (S.ex && !S.ex.over) $('b-resume').hidden = false;
 const start = () => {};
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start();
 window.__MTM_STATE = S; // para testes automatizados
+
+// ---------- v1.1 · QA: medidor ?fps e autoteste ?selftest (Otávio) ----------
+// rAF por quadro: quantos callbacks de animação rodam a cada quadro de tela (normal: 2 a 4).
+// renders por quadro: quantas vezes o mapa 3D é desenhado a cada quadro (normal: no máximo 1).
+// O bug da v1.0 fazia os dois números dobrarem a cada quadro durante a perfuração.
+const QA = { raf: 0, frames: 0, maxGap: 0, lastT: 0, cur: 0, pico: 0, explodiu: false };
+if (QS.has('fps') || QS.has('selftest')) {
+  const origRAF = window.requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = cb => {
+    QA.raf++; QA.cur++; QA.pico = Math.max(QA.pico, QA.cur);
+    // trava de segurança do autoteste: laço se multiplicando (bug da v1.0) é registrado e cortado antes de congelar a página
+    if (QA.cur > 100 && QS.has('selftest')) { QA.explodiu = true; return 0; }
+    return origRAF(cb);
+  };
+  const tick = t => { if (QA.lastT) QA.maxGap = Math.max(QA.maxGap, t - QA.lastT); QA.lastT = t; QA.frames++; QA.cur = 0; origRAF(tick); };
+  origRAF(tick);
+}
+function qaSample() { return { raf: QA.raf, frames: QA.frames, renders: GFX.stats.renders, t: performance.now() }; }
+function qaDiff(a, b) {
+  const fr = Math.max(1, b.frames - a.frames);
+  return { fps: Math.round(fr / ((b.t - a.t) / 1000)), rafPorQuadro: +((b.raf - a.raf) / fr).toFixed(2), rendersPorQuadro: +((b.renders - a.renders) / fr).toFixed(2) };
+}
+if (QS.has('fps')) {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;left:6px;bottom:calc(6px + env(safe-area-inset-bottom,0px));z-index:99;background:rgba(0,0,0,.78);color:#86e8b8;font:12px/1.35 "Share Tech Mono",monospace;padding:6px 8px;border:1px solid #86e8b8;border-radius:6px;pointer-events:none;white-space:pre';
+  document.body.appendChild(el);
+  let a = qaSample();
+  setInterval(() => {
+    const b = qaSample(), d = qaDiff(a, b), bad = d.rafPorQuadro > 6 || d.rendersPorQuadro > 1.2;
+    el.style.color = el.style.borderColor = bad ? '#ff6f5e' : d.fps < 40 ? '#f0c040' : '#86e8b8';
+    el.textContent = `FPS ${d.fps}  pior quadro ${Math.round(QA.maxGap)} ms\nrAF/quadro ${d.rafPorQuadro}  mapa/quadro ${d.rendersPorQuadro}\ngráficos: ${GFX.ok ? GFX.quality : '2D'}`;
+    QA.maxGap = 0; a = b;
+  }, 1000);
+}
+if (QS.has('selftest')) setTimeout(runSelftest, 600);
+async function runSelftest() {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;inset:auto 8px 8px 8px;z-index:100;background:#10141c;color:#ece7dc;border:2px solid #ffb347;border-radius:10px;padding:12px;font:13px/1.45 "Share Tech Mono",monospace;max-height:45vh;overflow:auto;white-space:pre-wrap';
+  box.textContent = 'AUTOTESTE: preparando…'; document.body.appendChild(box);
+  const log = s => { box.textContent += '\n' + s; console.log('[selftest] ' + s); };
+  if (!S.gfxAsked) { S.gfx = QS.get('selftest') === 'leve' ? 'leve' : 'alto'; S.gfxAsked = true; closeSheet(); bootGfx(); }
+  closeSheet(); S.calm = false; applyAccess();
+  S.camp = M.newCampaign(12345); M.applyChar(S.camp, 'minerador'); S.camp.credits = 5000; S.helpSeen = true;
+  S.camp.corpTipsShown = ['satellite', 'first_cell', 'dry', 'near_goal', 'rescue', 'blind'];
+  S.ex = M.newExpedition(S.camp, 'tranq', 'padrao', {}); S.ex.o2 = S.ex.o2Max = 400; S.sel = -1; S.reveal = false;
+  show('s-exp'); renderExp(); await wait(800);
+  M.doOrbital(S.camp, S.ex); renderExp(); await wait(400);
+  box.textContent = `AUTOTESTE · gráficos ${GFX.ok ? GFX.quality : '2D (sem WebGL)'} · 5 perfurações seguidas`;
+  const base0 = qaSample(); await wait(1500); const idle0 = qaDiff(base0, qaSample());
+  log(`parado antes:  FPS ${idle0.fps} · rAF/quadro ${idle0.rafPorQuadro} · mapa/quadro ${idle0.rendersPorQuadro}`);
+  const order = S.ex.known.map((k, i) => [k.orb ? k.orb.he : 0, i]).sort((x, y) => y[0] - x[0]).map(x => x[1]);
+  const res = [];
+  for (let n = 0; n < 5; n++) {
+    const i = order[n]; S.sel = i; S.ex.drillMaint = 0; renderExp();
+    const a = qaSample(); QA.maxGap = 0;
+    runDrill(i, 'he');
+    for (let k = 0; k < 100 && !$('v-ok') && !QA.explodiu; k++) await wait(100); // espera o veredito
+    if (!QA.explodiu) await wait(1600); // inclui a explosão de partículas (~1,5 s)
+    const d = qaDiff(a, qaSample()); d.pior = Math.round(QA.maxGap); res.push(d);
+    log(`furo ${n + 1}: FPS ${d.fps} · pior quadro ${d.pior} ms · rAF/quadro ${d.rafPorQuadro} · mapa/quadro ${d.rendersPorQuadro}`);
+    if (QA.explodiu) { log(`   ⚠ laço de animação se multiplicando: ${QA.pico} chamadas num único quadro (normal: 2 a 4)`); break; }
+    $('v-ok')?.click(); await wait(300);
+  }
+  const b1 = qaSample(); await wait(1500); const idle1 = qaDiff(b1, qaSample());
+  log(`parado depois: FPS ${idle1.fps} · rAF/quadro ${idle1.rafPorQuadro} · mapa/quadro ${idle1.rendersPorQuadro}`);
+  const maxRaf = Math.max(...res.map(r => r.rafPorQuadro)), maxRen = Math.max(...res.map(r => r.rendersPorQuadro));
+  const cresce = res.length < 5 || res[res.length - 1].rafPorQuadro > res[0].rafPorQuadro * 1.5 + 0.5;
+  const ok = !QA.explodiu && maxRaf <= 6 && maxRen <= 1.2 && !cresce && idle1.rafPorQuadro <= idle0.rafPorQuadro + 1;
+  log(ok ? `\n✅ PASSOU: o laço de animação não se multiplica (máx ${maxRaf} rAF e ${maxRen} desenhos do mapa por quadro).`
+    : `\n❌ FALHOU: rAF/quadro chegou a ${maxRaf}, mapa/quadro a ${maxRen}${cresce ? ', e cresce a cada furo' : ''}.`);
+  log('Seu progresso não foi tocado (o autoteste usa um save separado). Feche a página para sair.');
+  box.style.borderColor = ok ? '#86e8b8' : '#ff6f5e';
+  window.__SELFTEST = { ok, idle0, idle1, furos: res, picoRafNumQuadro: QA.pico, explodiu: QA.explodiu, graficos: GFX.ok ? GFX.quality : '2D' };
+}
 })();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
