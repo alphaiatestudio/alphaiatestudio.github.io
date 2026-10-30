@@ -6,6 +6,7 @@ Jogue online: https://alphaiatestudio.github.io/
 
 | Jogo | Arquivo |
 |---|---|
+| Mining the Moon: Lunar Tycoon | `mining-the-moon/` (PWA: instala na tela inicial e abre offline) |
 | Snake Cubo 3D | `snake-cubo-3d-cdn.html` |
 | Tetris Neon 3D | `tetris-neon-3d.html` |
 
