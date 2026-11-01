@@ -99,9 +99,29 @@
       theme_label: "Fondo", t_auto: "Automático", t_noite: "Noche neón", t_dia: "Día", t_ponte: "Puente de mando",
       now_auto: "Automático según tu hora local: ", now_manual: "Fondo elegido por ti: ",
       foot_made: "Hecho a bordo, con HTML puro y Three.js"
+    },
+    zh: {
+      tagline: "由一位指挥官和一支 AI 船员打造的游戏",
+      cta_play: "玩 Mining the Moon", cta_studio: "认识工作室",
+      games_title: "选择你的目的地",
+      mining_tag: "休闲 · 解谜",
+      mining_desc: "勘探月球氦，管理氧气，为静海基地筹集资金。专为手机竖屏游玩设计，可添加到主屏幕。",
+      snake_tag: "3D 街机",
+      snake_desc: "小蛇在立方体表面爬行。传送门、任务、多种模式、皮肤和最高分。",
+      snakes3d_tag: "测试中 · 3D 街机",
+      snakes3d_desc: "新一代立方体贪吃蛇：点击屏幕两侧转向、皮肤，在应用中还能倾斜手机操作。",
+      studio_tag: "模拟", studio_title: "工作室的游艇",
+      studio_desc: "登船，在工作室模拟中认识船员。",
+      btn_play: "开始游戏", btn_preview: "查看预览", close: "关闭",
+      real_shot: "游戏实机截图", soon: "截图即将推出",
+      pw_title: "船的密码", pw_desc: "输入密码，登上 Alphaiate 的演示。",
+      pw_ph: "输入密码", pw_btn: "登船", pw_wrong: "密码错误。", pw_unset: "无法加载船只，请检查网络连接。", pw_checking: "正在核对密码……", pw_boarding: "正在登船……",
+      theme_label: "背景", t_auto: "自动", t_noite: "霓虹之夜", t_dia: "白天", t_ponte: "指挥舰桥",
+      now_auto: "按你的当地时间自动切换：", now_manual: "你选择的背景：",
+      foot_made: "船上制作，纯 HTML 与 Three.js · 中文翻译审校中"
     }
   };
-  var HTML_LANG = { pt: "pt-BR", en: "en", es: "es" };
+  var HTML_LANG = { pt: "pt-BR", en: "en", es: "es", zh: "zh-Hans" };
 
   /* ============ UTIL ============ */
   function $(s, r) { return (r || document).querySelector(s); }
@@ -261,10 +281,16 @@
   });
 
   /* ============ INÍCIO ============ */
-  $$(".langs button").forEach(function (b) { b.addEventListener("click", function () { applyLang(b.dataset.lang); }); });
+  $$(".langs button").forEach(function (b) { b.addEventListener("click", function () { var from = lang; applyLang(b.dataset.lang); if (window.AIA && lang !== from) AIA.setLang(lang); }); });
   $$("[data-theme-mode]").forEach(function (b) { b.addEventListener("click", function () { applyMode(b.dataset.themeMode); }); });
 
   applyLang(detectLang());
+
+  /* ============ TELEMETRIA (AIA v02 · Helena · D-HEL1-1 a 3) ============ */
+  if (window.AIA) {
+    AIA.init({ game: "site", ver: "2026-11-01", lang: lang, ga: "G-NX13HK9MDJ" });
+    AIA.askConsent();
+  }
   initGames();
   var savedMode = store("aia-theme");
   applyMode(savedMode && (savedMode === "auto" || THEMES[savedMode]) ? savedMode : "auto");
