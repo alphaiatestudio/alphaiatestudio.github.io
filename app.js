@@ -11,10 +11,10 @@
         // coloque seus prints reais em img/prints/ (WebP ou PNG) e liste aqui
         shots: ["img/prints/mining-1.webp"]
       },
-      // Snakes Neon 3D (v2.7 em teste). Troque o print de img/prints/snakes-neon-3d-1.webp pela arte final.
+      // Snakes Neon 3D (v2.8 em teste). Troque o print de img/prints/snakes-neon-3d-1.webp pela arte final.
       snakes3d: {
         title: "SNAKES NEON 3D",
-        url: "https://alphaiatestudio.github.io/snakes-neon-3d-v2.7.html",
+        url: "https://alphaiatestudio.github.io/snakes-neon-3d-v2.8.html",
         shots: ["img/prints/snakes-neon-3d-1.webp"]
       }
     },
