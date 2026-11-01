@@ -1,20 +1,20 @@
-# Alpha-IAte Studio · jogos
+# Alphaiate Studio · jogos
 
-Jogos lançados pelo Alpha-IAte Studio. Cada jogo é um único arquivo HTML: abra no navegador e jogue.
+Jogos lançados pelo Alphaiate Studio. Cada jogo é um único arquivo HTML: abra no navegador e jogue.
 
 Jogue online: https://alphaiatestudio.github.io/
 
 | Jogo | Arquivo |
 |---|---|
-| Mining the Moon: Lunar Tycoon | `mining-the-moon/` (PWA: instala na tela inicial e abre offline) |
-| Snake Cubo 3D | `snake-cubo-3d-cdn.html` |
+| Mining the Moon: Lunar Corps | `mining-the-moon/` (PWA: instala na tela inicial e abre offline) |
+| SNAKES NEON 3D | `snakes-neon-3d-v2.7.html` |
 | Tetris Neon 3D | `tetris-neon-3d.html` |
 
 Documentação dos jogos: [README-snake.md](README-snake.md) e [README-tetris.md](README-tetris.md).
 
 ## Senha do navio
 
-A página inicial tem o campo **SENHA DO NAVIO**, que abre uma demonstração do Alpha-IAte, o iate da tripulação do estúdio. O iate fica cifrado em `navio.json` e só abre com a senha. Para gerar de novo, rode no repositório `alpha-iate`:
+A página inicial tem o campo **SENHA DO NAVIO**, que abre uma demonstração do Alphaiate, o iate da tripulação do estúdio. O iate fica cifrado em `navio.json` e só abre com a senha. Para gerar de novo, rode no repositório `alpha-iate`:
 
 ```
 node tools/gerar-demo.mjs <senha> <caminho deste repositório>/navio.json

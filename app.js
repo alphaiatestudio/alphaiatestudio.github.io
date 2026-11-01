@@ -1,4 +1,4 @@
-/* Alpha-IAte Studio: temas por horário, 3 idiomas, prévias e senha */
+/* Alphaiate Studio: temas por horário, 3 idiomas, prévias e senha */
 (function () {
   "use strict";
 
@@ -6,19 +6,14 @@
   var CONFIG = {
     games: {
       mining: {
-        title: "Mining the Moon: Lunar Tycoon",
+        title: "Mining the Moon: Lunar Corps",
         url: "https://alphaiatestudio.github.io/mining-the-moon/",
         // coloque seus prints reais em img/prints/ (WebP ou PNG) e liste aqui
         shots: ["img/prints/mining-1.webp"]
       },
-      snake: {
-        title: "Snake Cubo 3D",
-        url: "https://alphaiatestudio.github.io/snake-cubo-3d-cdn.html",
-        shots: ["img/prints/snake-1.webp"]
-      },
       // Snakes Neon 3D (v2.7 em teste). Troque o print de img/prints/snakes-neon-3d-1.webp pela arte final.
       snakes3d: {
-        title: "Snakes Neon 3D",
+        title: "SNAKES NEON 3D",
         url: "https://alphaiatestudio.github.io/snakes-neon-3d-v2.7.html",
         shots: ["img/prints/snakes-neon-3d-1.webp"]
       }
@@ -49,7 +44,7 @@
       tagline: "Jogos feitos por um comandante e uma tripulação de IA",
       cta_play: "Jogar Mining the Moon", cta_studio: "Conhecer o estúdio",
       games_title: "ESCOLHA SEU DESTINO",
-      mining_tag: "Idle · Tycoon",
+      mining_tag: "Chill · Puzzle",
       mining_desc: "Prospecte hélio lunar, administre o oxigênio e financie a Base Tranquilidade. Feito para jogar no celular, em pé; dá para instalar na tela inicial.",
       snake_tag: "Arcade 3D",
       snake_desc: "A cobrinha anda na superfície de um cubo. Portais, missões, modos de jogo, skins e highscores.",
@@ -59,7 +54,7 @@
       studio_desc: "Suba a bordo e conheça a tripulação em uma simulação do estúdio.",
       btn_play: "Jogar", btn_preview: "Ver prévia", close: "Fechar",
       real_shot: "Captura real do jogo", soon: "Captura em breve",
-      pw_title: "Senha do navio", pw_desc: "Digite a senha para embarcar na demonstração do Alpha-IAte.",
+      pw_title: "Senha do navio", pw_desc: "Digite a senha para embarcar na demonstração do Alphaiate.",
       pw_ph: "Digite a senha", pw_btn: "Embarcar", pw_wrong: "Senha incorreta.", pw_unset: "Não deu para carregar o navio. Verifique a conexão.", pw_checking: "Conferindo a senha…", pw_boarding: "Embarcando…",
       theme_label: "Fundo", t_auto: "Automático", t_noite: "Noite neon", t_dia: "Dia", t_ponte: "Ponte de comando",
       now_auto: "Automático pela sua hora local: ", now_manual: "Fundo escolhido por você: ",
@@ -69,7 +64,7 @@
       tagline: "Games made by a commander and an AI crew",
       cta_play: "Play Mining the Moon", cta_studio: "Meet the studio",
       games_title: "CHOOSE YOUR DESTINATION",
-      mining_tag: "Idle · Tycoon",
+      mining_tag: "Chill · Puzzle",
       mining_desc: "Prospect lunar helium, manage your oxygen and fund Tranquility Base. Built for phones, played upright; installable on your home screen.",
       snake_tag: "3D Arcade",
       snake_desc: "The little snake crawls across the surface of a cube. Portals, missions, game modes, skins and highscores.",
@@ -79,7 +74,7 @@
       studio_desc: "Come aboard and meet the crew in a simulation of the studio.",
       btn_play: "Play", btn_preview: "Preview", close: "Close",
       real_shot: "Real in-game capture", soon: "Capture coming soon",
-      pw_title: "Ship password", pw_desc: "Enter the password to board the Alpha-IAte demo.",
+      pw_title: "Ship password", pw_desc: "Enter the password to board the Alphaiate demo.",
       pw_ph: "Enter password", pw_btn: "Board", pw_wrong: "Wrong password.", pw_unset: "Could not load the ship. Check your connection.", pw_checking: "Checking the password…", pw_boarding: "Boarding…",
       theme_label: "Background", t_auto: "Automatic", t_noite: "Neon night", t_dia: "Day", t_ponte: "Command bridge",
       now_auto: "Automatic by your local time: ", now_manual: "Background chosen by you: ",
@@ -89,7 +84,7 @@
       tagline: "Juegos hechos por un comandante y una tripulación de IA",
       cta_play: "Jugar Mining the Moon", cta_studio: "Conocer el estudio",
       games_title: "ELIGE TU DESTINO",
-      mining_tag: "Idle · Tycoon",
+      mining_tag: "Chill · Puzzle",
       mining_desc: "Prospecta helio lunar, gestiona el oxígeno y financia la Base Tranquilidad. Hecho para jugar en el móvil, de pie; se instala en la pantalla de inicio.",
       snake_tag: "Arcade 3D",
       snake_desc: "La serpiente avanza por la superficie de un cubo. Portales, misiones, modos de juego, skins y récords.",
@@ -99,7 +94,7 @@
       studio_desc: "Sube a bordo y conoce a la tripulación en una simulación del estudio.",
       btn_play: "Jugar", btn_preview: "Ver vista previa", close: "Cerrar",
       real_shot: "Captura real del juego", soon: "Captura próximamente",
-      pw_title: "Contraseña del barco", pw_desc: "Escribe la contraseña para subir a la demostración de Alpha-IAte.",
+      pw_title: "Contraseña del barco", pw_desc: "Escribe la contraseña para subir a la demostración de Alphaiate.",
       pw_ph: "Escribe la contraseña", pw_btn: "Embarcar", pw_wrong: "Contraseña incorrecta.", pw_unset: "No se pudo cargar el barco. Revisa la conexión.", pw_checking: "Comprobando la contraseña…", pw_boarding: "Embarcando…",
       theme_label: "Fondo", t_auto: "Automático", t_noite: "Noche neón", t_dia: "Día", t_ponte: "Puente de mando",
       now_auto: "Automático según tu hora local: ", now_manual: "Fondo elegido por ti: ",

@@ -464,6 +464,9 @@ html.lay-portrait #ctrlPop { display: none !important; }
 #frSkip { position: absolute; right: var(--sr); bottom: calc(12px + var(--sb)); min-height: 44px; padding: 8px 16px; border-radius: 22px; border: 2px solid rgba(255,255,255,.35); background: rgba(8,10,22,.6); color: #fff; font: inherit; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { #fr { animation: none; } }
 body[data-theme="acessivel"] #frSkip { background: #000; border-color: #fff; }
+
+.xskin { flex-wrap: wrap; }
+.xskin > .xbtn { flex: 1 1 100%; min-height: 32px; }
 </style>
 </head>
 <body data-theme="neon">
@@ -524,7 +527,7 @@ body[data-theme="acessivel"] #frSkip { background: #000; border-color: #fff; }
       <div class="cards">
         <div class="card" data-mode="classic"><h3><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-gamepad"/></svg></span><bdi data-i18n="mode.classic">CLÁSSICO</bdi></h3><p data-i18n="mode.classic.d">O jogo completo: recordes, fantasma, festival e portais.</p></div>
         <div class="card" data-mode="sandbox"><h3><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-infinity"/></svg></span><bdi data-i18n="mode.sandbox">SANDBOX</bdi></h3><p data-i18n="mode.sandbox.d">Sem morte, 5x frutas e 2x power-ups. Nada conta recorde.</p></div>
-        <div class="card" data-mode="survival"><h3><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg></span><bdi data-i18n="mode.survival">SOBREVIVÊNCIA</bdi></h3><p data-i18n="mode.survival.d">Velocidade crescente, fome e a Fúria das Pedras.</p></div>
+        <div class="card" data-mode="survival"><h3><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-flame"/></svg></span><bdi data-i18n="mode.survival">SOBRE​VIVÊNCIA</bdi></h3><p data-i18n="mode.survival.d">Velocidade crescente, fome e a Fúria das Pedras.</p></div>
         <div class="card" data-mode="mission"><h3><span class="ic"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span><bdi data-i18n="mode.mission">DESAFIO</bdi></h3><p><bdi data-i18n="mode.mission.d">8 missões com objetivos variados.</bdi> <span id="missionCount"></span></p></div>
       </div>
       <div class="mhint" id="ctrlHint"></div>
@@ -650,7 +653,7 @@ const I18N = {
     "modes.title": "ESCOLHA O MODO",
     "mode.classic": "CLÁSSICO", "mode.classic.d": "O jogo completo: recordes, fantasma, festival e portais.",
     "mode.sandbox": "SANDBOX", "mode.sandbox.d": "Sem morte, 5x frutas e 2x power-ups. Nada conta recorde.",
-    "mode.survival": "SOBREVIVÊNCIA", "mode.survival.d": "Velocidade crescente, fome e a Fúria das Pedras.",
+    "mode.survival": "SOBRE​VIVÊNCIA", "mode.survival.d": "Velocidade crescente, fome e a Fúria das Pedras.",
     "mode.mission": "DESAFIO", "mode.mission.d": "8 missões com objetivos variados.",
     "modes.pcHint": "Teste no PC: ← → viram · Espaço pausa · Esc volta aqui",
     "missions.title": "MISSÕES", "btn.back": "VOLTAR", "ov.sub0": "Escolha um modo para começar",
@@ -897,7 +900,7 @@ const I18N = {
     "modes.title": "ELIGE EL MODO",
     "mode.classic": "CLÁSICO", "mode.classic.d": "El juego completo: récords, fantasma, festival y portales.",
     "mode.sandbox": "SANDBOX", "mode.sandbox.d": "Sin muerte, 5x frutas y 2x power-ups. Nada cuenta récord.",
-    "mode.survival": "SUPERVIVENCIA", "mode.survival.d": "Velocidad creciente, hambre y la Furia de las Piedras.",
+    "mode.survival": "SUPER​VIVENCIA", "mode.survival.d": "Velocidad creciente, hambre y la Furia de las Piedras.",
     "mode.mission": "DESAFÍO", "mode.mission.d": "8 misiones con objetivos variados.",
     "modes.pcHint": "En PC: ← → giran · Espacio pausa · Esc vuelve aquí",
     "missions.title": "MISIONES", "btn.back": "VOLVER", "ov.sub0": "Elige un modo para empezar",

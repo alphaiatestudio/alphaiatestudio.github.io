@@ -1,7 +1,7 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<!-- Mining the Moon: Lunar Tycoon v1.0 — Alpha-IAte Studio · Selene Corp. 2077 -->
-<title>Mining the Moon: Lunar Tycoon</title>
-<meta name="description" content="Prospecte hélio lunar, administre o oxigênio e financie a Base Tranquilidade. Um jogo do Alpha-IAte Studio.">
+<!-- Mining the Moon: Lunar Corps v1.0 — Alphaiate Studio · Selene Corp. 2077 -->
+<title>Mining the Moon: Lunar Corps</title>
+<meta name="description" content="Prospecte hélio lunar, administre o oxigênio e financie a Base Tranquilidade. Um jogo do Alphaiate Studio.">
 <meta name="theme-color" content="#07090d">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
@@ -458,7 +458,7 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
           <div class="title">
             <span class="eyebrow" style="color:var(--fg)">Selene Corp. · 2077 · Centro de Operações</span>
             <h1>Mining the Moon</h1>
-            <span class="sub">Lunar Tycoon</span>
+            <span class="sub">Lunar Corps</span>
           </div>
         </div>
         <p class="muted">2077. A fissão ainda mantém as luzes da Terra acesas; a fusão é o futuro, e o hélio lunar é a chave. A Selene Corp. paga por cada grama que você extrair. Ninguém sabe o que tem embaixo do regolito: pesquise, decida onde furar e torça. O hélio lunar paga as contas; o oxigênio decide quanto tempo você aguenta.</p>
@@ -501,7 +501,7 @@ body.calm *, body.calm *::before, body.calm *::after { animation: none !importan
           <button class="btn primary" id="b-reset-yes">Apagar e recomeçar</button>
         </div>
       </div>
-      <p class="muted" style="font-size:.8rem">v1.2 · Alpha-IAte Studio · versão de lançamento para amigos. Seu progresso fica salvo neste aparelho.</p>
+      <p class="muted" style="font-size:.8rem">v1.2 · Alphaiate Studio · versão de lançamento para amigos. Seu progresso fica salvo neste aparelho.</p>
     </div>
   </section>
 
@@ -3654,7 +3654,7 @@ async function buildPost() {
   g.fillStyle = eg; g.beginPath(); g.arc(920, 190, 80, 0, 7); g.fill(); g.strokeStyle = 'rgba(120,180,255,.55)'; g.lineWidth = 6; g.stroke();
   // cabeçalho
   g.textBaseline = 'alphabetic'; g.fillStyle = '#ffb347'; g.font = '800 74px Orbitron, sans-serif'; g.fillText('MINING', 70, 150); g.fillText('THE MOON', 70, 232);
-  g.fillStyle = '#9aa3b2'; g.font = '600 34px Rajdhani, sans-serif'; g.fillText('LUNAR TYCOON · EXPEDIÇÃO #' + c.exp, 74, 282);
+  g.fillStyle = '#9aa3b2'; g.font = '600 34px Rajdhani, sans-serif'; g.fillText('LUNAR CORPS · EXPEDIÇÃO #' + c.exp, 74, 282);
   // título conquistado
   g.fillStyle = '#52d9ea'; g.font = '700 46px Rajdhani, sans-serif'; g.fillText(titleFor(r, st), 70, 370);
   // mapa real com os poços
@@ -3685,7 +3685,7 @@ async function buildPost() {
   g.fillText(`${M.REGIONS[ex.regId].nome}${ch ? ' · com ' + ch.nome : ''}`, 70, 1226);
   // rodapé
   g.fillStyle = 'rgba(255,179,71,.14)'; g.fillRect(0, H - 82, W, 82);
-  g.fillStyle = '#ffb347'; g.font = '700 30px Rajdhani, sans-serif'; g.fillText('ALPHA-IATE STUDIO', 70, H - 30);
+  g.fillStyle = '#ffb347'; g.font = '700 30px Rajdhani, sans-serif'; g.fillText('ALPHAIATE STUDIO', 70, H - 30);
   g.fillStyle = '#ece7dc'; g.font = '400 28px "Share Tech Mono", monospace'; g.textAlign = 'right'; g.fillText('alphaiatestudio.github.io', W - 70, H - 30); g.textAlign = 'left';
   return cnv;
 }
@@ -3701,7 +3701,7 @@ async function openPostImage() {
 }
 async function sharePost() {
   if (!postBlob) return;
-  try { await navigator.share({ files: [new File([postBlob], 'mining-the-moon.png', { type: 'image/png' })], text: 'Minha expedição em Mining the Moon: Lunar Tycoon · alphaiatestudio.github.io' }); }
+  try { await navigator.share({ files: [new File([postBlob], 'mining-the-moon.png', { type: 'image/png' })], text: 'Minha expedição em Mining the Moon: Lunar Corps · alphaiatestudio.github.io' }); }
   catch (e) { if (e && e.name !== 'AbortError') savePost(); }
 }
 function savePost() {
