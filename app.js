@@ -15,6 +15,12 @@
         title: "Snake Cubo 3D",
         url: "https://alphaiatestudio.github.io/snake-cubo-3d-cdn.html",
         shots: ["img/prints/snake-1.webp"]
+      },
+      // Snakes Neon 3D (v2.7 em teste). Troque o print de img/prints/snakes-neon-3d-1.webp pela arte final.
+      snakes3d: {
+        title: "Snakes Neon 3D",
+        url: "https://alphaiatestudio.github.io/snakes-neon-3d-v2.7.html",
+        shots: ["img/prints/snakes-neon-3d-1.webp"]
       }
     },
     // Imagem do cartão da simulação do estúdio
@@ -47,6 +53,8 @@
       mining_desc: "Prospecte hélio lunar, administre o oxigênio e financie a Base Tranquilidade. Feito para jogar no celular, em pé; dá para instalar na tela inicial.",
       snake_tag: "Arcade 3D",
       snake_desc: "A cobrinha anda na superfície de um cubo. Portais, missões, modos de jogo, skins e highscores.",
+      snakes3d_tag: "Em teste · Arcade 3D",
+      snakes3d_desc: "A nova geração da cobra do cubo: toque nas laterais da tela, skins e, no app, controle por inclinação.",
       studio_tag: "Simulação", studio_title: "O iate do estúdio",
       studio_desc: "Suba a bordo e conheça a tripulação em uma simulação do estúdio.",
       btn_play: "Jogar", btn_preview: "Ver prévia", close: "Fechar",
@@ -65,6 +73,8 @@
       mining_desc: "Prospect lunar helium, manage your oxygen and fund Tranquility Base. Built for phones, played upright; installable on your home screen.",
       snake_tag: "3D Arcade",
       snake_desc: "The little snake crawls across the surface of a cube. Portals, missions, game modes, skins and highscores.",
+      snakes3d_tag: "In testing · 3D Arcade",
+      snakes3d_desc: "The next generation of the cube snake: tap the sides of the screen, skins and, in the app, tilt control.",
       studio_tag: "Simulation", studio_title: "The studio yacht",
       studio_desc: "Come aboard and meet the crew in a simulation of the studio.",
       btn_play: "Play", btn_preview: "Preview", close: "Close",
@@ -83,6 +93,8 @@
       mining_desc: "Prospecta helio lunar, gestiona el oxígeno y financia la Base Tranquilidad. Hecho para jugar en el móvil, de pie; se instala en la pantalla de inicio.",
       snake_tag: "Arcade 3D",
       snake_desc: "La serpiente avanza por la superficie de un cubo. Portales, misiones, modos de juego, skins y récords.",
+      snakes3d_tag: "En pruebas · Arcade 3D",
+      snakes3d_desc: "La nueva generación de la serpiente del cubo: toca los lados de la pantalla, skins y, en la app, control por inclinación.",
       studio_tag: "Simulación", studio_title: "El yate del estudio",
       studio_desc: "Sube a bordo y conoce a la tripulación en una simulación del estudio.",
       btn_play: "Jugar", btn_preview: "Ver vista previa", close: "Cerrar",
