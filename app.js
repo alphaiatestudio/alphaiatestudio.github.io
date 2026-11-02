@@ -11,10 +11,10 @@
         // coloque seus prints reais em img/prints/ (WebP ou PNG) e liste aqui
         shots: ["img/prints/mining-1.webp"]
       },
-      // Snakes Neon 3D (v2.8 em teste). Troque o print de img/prints/snakes-neon-3d-1.webp pela arte final.
+      // Snakes Neon 3D (v2.9 em teste). Troque o print de img/prints/snakes-neon-3d-1.webp pela arte final.
       snakes3d: {
         title: "SNAKES NEON 3D",
-        url: "https://alphaiatestudio.github.io/snakes-neon-3d-v2.8.html",
+        url: "https://alphaiatestudio.github.io/snakes-neon-3d-v2.9.html",
         shots: ["img/prints/snakes-neon-3d-1.webp"]
       }
     },
@@ -41,7 +41,7 @@
   /* ============ TEXTOS ============ */
   var I18N = {
     pt: {
-      tagline: "Jogos feitos por um comandante e uma tripulação de IA",
+      tagline: "Veja os trabalhos iniciais de uma tripulação digital que produz jogos com criatividade humana e inteligência de máquina. Bem vindo ao Alphaiate, um estúdio que flutua plenamente nas ondas internéticas às praias do Github.",
       cta_play: "Jogar Mining the Moon", cta_studio: "Conhecer o estúdio",
       games_title: "ESCOLHA SEU DESTINO",
       mining_tag: "Chill · Puzzle",
@@ -61,7 +61,7 @@
       foot_made: "Feito a bordo, com HTML puro e Three.js"
     },
     en: {
-      tagline: "Games made by a commander and an AI crew",
+      tagline: "See the early work of a digital crew that makes games with human creativity and machine intelligence. Welcome to Alphaiate, a studio fully afloat on the waves of the internet, all the way to the shores of GitHub.",
       cta_play: "Play Mining the Moon", cta_studio: "Meet the studio",
       games_title: "CHOOSE YOUR DESTINATION",
       mining_tag: "Chill · Puzzle",
@@ -81,7 +81,7 @@
       foot_made: "Made aboard, with plain HTML and Three.js"
     },
     es: {
-      tagline: "Juegos hechos por un comandante y una tripulación de IA",
+      tagline: "Mira los primeros trabajos de una tripulación digital que crea juegos con creatividad humana e inteligencia de máquina. Bienvenido a Alphaiate, un estudio que flota de lleno en las olas de internet hasta las playas de GitHub.",
       cta_play: "Jugar Mining the Moon", cta_studio: "Conocer el estudio",
       games_title: "ELIGE TU DESTINO",
       mining_tag: "Chill · Puzzle",
@@ -101,7 +101,7 @@
       foot_made: "Hecho a bordo, con HTML puro y Three.js"
     },
     zh: {
-      tagline: "由一位指挥官和一支 AI 船员打造的游戏",
+      tagline: "来看看一支数字船员的早期作品：他们用人类的创造力和机器的智能制作游戏。欢迎来到 Alphaiate——一个在互联网浪潮中自在漂流、直抵 GitHub 海岸的工作室。",
       cta_play: "玩 Mining the Moon", cta_studio: "认识工作室",
       games_title: "选择你的目的地",
       mining_tag: "休闲 · 解谜",

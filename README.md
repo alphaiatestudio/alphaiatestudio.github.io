@@ -7,7 +7,7 @@ Jogue online: https://alphaiatestudio.github.io/
 | Jogo | Arquivo |
 |---|---|
 | Mining the Moon: Lunar Corps | `mining-the-moon/` (PWA: instala na tela inicial e abre offline) |
-| SNAKES NEON 3D | `snakes-neon-3d-v2.8.html` |
+| SNAKES NEON 3D | `snakes-neon-3d-v2.9.html` |
 | Tetris Neon 3D | `tetris-neon-3d.html` |
 
 Documentação dos jogos: [README-snake.md](README-snake.md) e [README-tetris.md](README-tetris.md).
