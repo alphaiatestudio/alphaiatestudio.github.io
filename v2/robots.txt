@@ -1,0 +1,4 @@
+# Prévia do site v2: ainda não indexar. Ao trocar o site, este arquivo vai para a raiz sem a linha Disallow.
+User-agent: *
+Disallow: /v2/
+Sitemap: https://alphaiatestudio.github.io/sitemap.xml

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Alphaiate Studio (prévia v2)</title>
+<meta name="description" content="Um estúdio de um homem só que, com uma tripulação virtual, transforma ideias em jogos e apps com método, cuidado e melhoria contínua.">
+<meta property="og:title" content="Alphaiate Studio">
+<meta property="og:description" content="Jogos curtos, feitos com método e cuidado. Jogue em dois cliques e ajude a melhorar.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0a0c0f">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="v2.css">
+</head>
+<body>
+<p class="previa" role="note">Prévia do site v2 (esqueleto). O site atual continua em <a href="../">alphaiatestudio.github.io</a>.</p>
+
+<header class="top">
+  <a class="brand" href="#inicio" aria-label="Alphaiate Studio">
+    <img src="favicon.svg" alt="" width="36" height="36">
+    <span>ALPHAIATE <b>STUDIO</b></span>
+  </a>
+</header>
+
+<main id="inicio">
+  <section class="hero">
+    <h1>ALPHAIATE <b>STUDIO</b></h1>
+    <p class="tagline">Um estúdio de um homem só que, com uma tripulação virtual, transforma ideias em jogos e apps com método, cuidado e melhoria contínua.</p>
+  </section>
+
+  <section class="games" aria-labelledby="gamesTitle">
+    <h2 id="gamesTitle">Escolha o seu destino</h2>
+    <div class="grid">
+      <article class="card">
+        <div class="shot" role="img" aria-label="Espaço da capa de Mining the Moon"></div>
+        <h3>Mining the Moon: Lunar Corps</h3>
+        <p>Gerencie uma base de mineração lunar de hélio-3 e oxigênio.</p>
+        <a class="btn" href="../mining-the-moon/">Jogar</a>
+      </article>
+      <article class="card">
+        <div class="shot" role="img" aria-label="Espaço da capa de Snakes Neon 3D"></div>
+        <h3>SNAKES NEON 3D</h3>
+        <p>A cobra clássica na superfície de um cubo, em neon.</p>
+        <a class="btn" href="../snakes-neon-3d-v2.9.html">Jogar</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="duvido" aria-labelledby="duvidoTitle">
+    <h2 id="duvidoTitle">Duvido você fazer</h2>
+    <p>Tem um desafio ou um projeto sob medida? Conta pra gente.</p>
+    <p class="aguarda">(Caixa a ser ligada na próxima etapa.)</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Alphaiate Studio é um empreendimento criativo em estágio experimental. Agradecemos seu feedback!</p>
+  <p class="small">Todos os direitos reservados. Uso comercial não permitido. Ao compartilhar, cite a fonte.</p>
+</footer>
+
+<!-- Aviso único de privacidade, com nome acessível (corrige o 96 de acessibilidade) -->
+<div class="aviso" role="dialog" aria-labelledby="avisoTitulo" aria-describedby="avisoTexto" hidden>
+  <p id="avisoTitulo" class="sr">Aviso de privacidade</p>
+  <p id="avisoTexto">Este site não usa análise de visitas. Os jogos pedem seu consentimento antes de qualquer medição.</p>
+  <button type="button" id="avisoOk">Entendi</button>
+</div>
+<script>
+  (function () {
+    var a = document.querySelector('.aviso'), k = 'aia_v2_aviso';
+    try { if (localStorage.getItem(k) === '1') return; } catch (e) {}
+    a.hidden = false;
+    document.getElementById('avisoOk').addEventListener('click', function () {
+      a.hidden = true;
+      try { localStorage.setItem(k, '1'); } catch (e) {}
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+:root{--fundo:#0a0c0f;--texto:#e9edf2;--ouro:#d6b475;--ciano:#5fe3f0;--linha:#2a2f36}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fundo);color:var(--texto);font:16px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif}
+a{color:var(--ouro)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.previa{margin:0;padding:8px 16px;background:#1b2128;color:var(--ciano);font-size:14px;text-align:center}
+.top{display:flex;padding:16px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--texto);text-decoration:none;letter-spacing:.12em}
+.brand b{color:var(--ouro);font-weight:700}
+.hero{padding:48px 16px 24px;max-width:720px;margin:0 auto}
+.hero h1{margin:0 0 12px;letter-spacing:.14em;font-size:clamp(28px,7vw,48px)}
+.hero h1 b{color:var(--ouro)}
+.tagline{margin:0;font-size:18px;max-width:34em}
+.games,.duvido{padding:24px 16px;max-width:960px;margin:0 auto}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{border:1px solid var(--linha);border-radius:14px;padding:16px;background:#10141a}
+.shot{aspect-ratio:16/9;border-radius:10px;background:linear-gradient(135deg,#161b22,#0e1217);margin-bottom:12px}
+.card h3{margin:0 0 6px}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border:1px solid var(--ouro);border-radius:22px 6px 22px 6px;color:var(--ouro);text-decoration:none}
+.btn:focus-visible,#avisoOk:focus-visible{outline:2px solid var(--ciano);outline-offset:2px}
+.aguarda{color:#9aa4b2;font-size:14px}
+.foot{padding:32px 16px 96px;text-align:center;color:#b6bfcc;font-size:14px}
+.small{font-size:13px}
+.aviso{position:fixed;left:8px;right:8px;bottom:8px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;background:#10151f;border:1px solid #3a4560;border-radius:12px;z-index:10}
+.aviso[hidden]{display:none}
+.aviso p{margin:0;flex:1 1 220px}
+#avisoOk{min-height:44px;min-width:88px;padding:0 14px;border-radius:10px;border:1px solid var(--ouro);background:transparent;color:var(--ouro);font:inherit;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Alphaiate Studio">
+  <rect width="64" height="64" rx="12" fill="#0a0c0f"/>
+  <g fill="#d6b475">
+    <path d="M31 9h2v6h-2z"/>
+    <rect x="24" y="16" width="16" height="3" rx="1.5"/>
+    <rect x="18" y="21" width="26" height="3" rx="1.5"/>
+    <rect x="13" y="26" width="34" height="3" rx="1.5"/>
+    <path d="M8 31h42l7 4-3 3H8z"/>
+    <path d="M7 44c9-3 16 3 25 0s16-3 25 0v3c-9-3-16 3-25 0s-16-3-25 0z"/>
+  </g>
+</svg>
