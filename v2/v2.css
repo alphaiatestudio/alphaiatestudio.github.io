@@ -7,6 +7,8 @@ a{color:var(--ouro)}
 .top{display:flex;padding:16px}
 .brand{display:flex;align-items:center;gap:10px;color:var(--texto);text-decoration:none;letter-spacing:.12em}
 .brand b{color:var(--ouro);font-weight:700}
+.hero-wrap{background:#000 url(img/fundo-home-mobile.webp) center bottom/cover no-repeat;min-height:70vh}
+@media(min-width:800px){.hero-wrap{background-image:url(img/fundo-home-wide.webp)}}
 .hero{padding:48px 16px 24px;max-width:720px;margin:0 auto}
 .hero h1{margin:0 0 12px;letter-spacing:.14em;font-size:clamp(28px,7vw,48px)}
 .hero h1 b{color:var(--ouro)}
@@ -14,7 +16,7 @@ a{color:var(--ouro)}
 .games,.duvido{padding:24px 16px;max-width:960px;margin:0 auto}
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .card{border:1px solid var(--linha);border-radius:14px;padding:16px;background:#10141a}
-.shot{aspect-ratio:16/9;border-radius:10px;background:linear-gradient(135deg,#161b22,#0e1217);margin-bottom:12px}
+.shot{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:#0e1217;margin-bottom:12px}
 .card h3{margin:0 0 6px}
 .btn{display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border:1px solid var(--ouro);border-radius:22px 6px 22px 6px;color:var(--ouro);text-decoration:none}
 .btn:focus-visible,#avisoOk:focus-visible{outline:2px solid var(--ciano);outline-offset:2px}
@@ -26,3 +28,9 @@ a{color:var(--ouro)}
 .aviso p{margin:0;flex:1 1 220px}
 #avisoOk{min-height:44px;min-width:88px;padding:0 14px;border-radius:10px;border:1px solid var(--ouro);background:transparent;color:var(--ouro);font:inherit;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.lua{position:relative;max-width:960px;margin:24px auto;padding:0 16px}
+.lua img{display:block;width:100%;height:auto;border-radius:14px}
+.lua-segredo{position:absolute;left:50%;top:47%;width:27%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:0;background:transparent;cursor:default;-webkit-touch-callout:none;user-select:none;-webkit-tap-highlight-color:transparent}
+dialog{background:#10151f;color:var(--texto);border:1px solid #3a4560;border-radius:14px}
+dialog::backdrop{background:rgba(0,0,0,.7)}

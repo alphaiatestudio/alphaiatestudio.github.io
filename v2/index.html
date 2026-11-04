@@ -9,6 +9,8 @@
 <meta property="og:title" content="Alphaiate Studio">
 <meta property="og:description" content="Jogos curtos, feitos com método e cuidado. Jogue em dois cliques e ajude a melhorar.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://alphaiatestudio.github.io/v2/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0a0c0f">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="v2.css">
@@ -24,27 +26,34 @@
 </header>
 
 <main id="inicio">
+  <div class="hero-wrap">
   <section class="hero">
     <h1>ALPHAIATE <b>STUDIO</b></h1>
     <p class="tagline">Um estúdio de um homem só que, com uma tripulação virtual, transforma ideias em jogos e apps com método, cuidado e melhoria contínua.</p>
   </section>
+  </div>
 
   <section class="games" aria-labelledby="gamesTitle">
     <h2 id="gamesTitle">Escolha o seu destino</h2>
     <div class="grid">
       <article class="card">
-        <div class="shot" role="img" aria-label="Espaço da capa de Mining the Moon"></div>
+        <img class="shot" src="img/capa-mining.webp" width="1100" height="467" alt="Base de mineração lunar iluminada, com um anel holográfico de varredura e a Terra ao fundo" loading="lazy">
         <h3>Mining the Moon: Lunar Corps</h3>
         <p>Gerencie uma base de mineração lunar de hélio-3 e oxigênio.</p>
         <a class="btn" href="../mining-the-moon/">Jogar</a>
       </article>
       <article class="card">
-        <div class="shot" role="img" aria-label="Espaço da capa de Snakes Neon 3D"></div>
+        <img class="shot" src="img/capa-snakes.webp" width="1100" height="467" alt="Serpente de cubos neon enrolada em um cubo escuro" loading="lazy">
         <h3>SNAKES NEON 3D</h3>
         <p>A cobra clássica na superfície de um cubo, em neon.</p>
         <a class="btn" href="../snakes-neon-3d-v2.9.html">Jogar</a>
       </article>
     </div>
+  </section>
+
+  <section class="lua" aria-label="Lua sobre o mar">
+    <img src="img/lua.webp" width="1280" height="720" alt="Lua cheia dourada nascendo sobre um mar escuro" loading="lazy">
+    <button type="button" class="lua-segredo" id="luaSegredo" aria-label="Área secreta: pressione e segure"></button>
   </section>
 
   <section class="duvido" aria-labelledby="duvidoTitle">
@@ -53,6 +62,14 @@
     <p class="aguarda">(Caixa a ser ligada na próxima etapa.)</p>
   </section>
 </main>
+
+<dialog id="navioDlg" aria-labelledby="navioTitulo">
+  <form method="dialog" class="dlg">
+    <h3 id="navioTitulo">Senha do navio</h3>
+    <p>A demonstração do iate será ligada na próxima etapa.</p>
+    <button type="submit" class="btn">Fechar</button>
+  </form>
+</dialog>
 
 <footer class="foot">
   <p>Alphaiate Studio é um empreendimento criativo em estágio experimental. Agradecemos seu feedback!</p>
@@ -66,6 +83,15 @@
   <button type="button" id="avisoOk">Entendi</button>
 </div>
 <script>
+  // Toque longo (700 ms) na lua abre o diálogo da senha do navio (D-JB13-4). Demo ainda não ligada.
+  (function () {
+    var b = document.getElementById('luaSegredo'), dlg = document.getElementById('navioDlg'), t;
+    function start() { t = setTimeout(function () { if (dlg.showModal) dlg.showModal(); }, 700); }
+    function stop() { clearTimeout(t); }
+    ['pointerdown'].forEach(function (e) { b.addEventListener(e, start); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (e) { b.addEventListener(e, stop); });
+    b.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  })();
   (function () {
     var a = document.querySelector('.aviso'), k = 'aia_v2_aviso';
     try { if (localStorage.getItem(k) === '1') return; } catch (e) {}
