@@ -16,6 +16,12 @@
 <link rel="stylesheet" href="v2.css">
 </head>
 <body>
+<div class="mar" aria-hidden="true">
+  <svg class="mar-linha" viewBox="0 0 400 12" preserveAspectRatio="none"><path d="M0 6 Q25 0 50 6 T100 6 T150 6 T200 6 T250 6 T300 6 T350 6 T400 6" fill="none" stroke="#d6b475" stroke-width="1.2" opacity=".55"/></svg>
+  <div class="iate" id="iate">
+    <svg class="iate-svg" viewBox="0 0 64 40" width="44" height="28"><g fill="#d6b475"><path d="M31 1h2v5h-2z"/><rect x="24" y="7" width="16" height="2.4" rx="1.2"/><rect x="18" y="11" width="26" height="2.4" rx="1.2"/><rect x="13" y="15" width="34" height="2.4" rx="1.2"/><path d="M8 19h42l7 3-3 2.5H8z"/><path d="M7 30c9-3 16 3 25 0s16-3 25 0v2.4c-9-3-16 3-25 0s-16-3-25 0z" fill="#5fe3f0" opacity=".85"/></g></svg>
+  </div>
+</div>
 <p class="previa" role="note">Prévia do site v2 (esqueleto). O site atual continua em <a href="../">alphaiatestudio.github.io</a>.</p>
 
 <header class="top">
@@ -91,6 +97,19 @@
     ['pointerdown'].forEach(function (e) { b.addEventListener(e, start); });
     ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (e) { b.addEventListener(e, stop); });
     b.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  })();
+  // Iate na rolagem (D-JB12-2): só transform, sem reflow; parado se o usuário reduz movimento.
+  (function () {
+    var y = document.getElementById('iate'), q = window.matchMedia('(prefers-reduced-motion: reduce)'), tk = false;
+    function pos() {
+      tk = false;
+      var d = document.documentElement, max = d.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      y.style.transform = 'translateX(' + (p * (d.clientWidth - 52)).toFixed(1) + 'px)';
+    }
+    if (q.matches) { y.style.transform = 'translateX(8px)'; return; }
+    window.addEventListener('scroll', function () { if (!tk) { tk = true; requestAnimationFrame(pos); } }, { passive: true });
+    window.addEventListener('resize', pos); pos();
   })();
   (function () {
     var a = document.querySelector('.aviso'), k = 'aia_v2_aviso';
